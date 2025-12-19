@@ -53,3 +53,4 @@ logs/
 
 # 🔒 Private project settings (with actual secrets)
 .ai/PROJECT.local.md
+.claude/
