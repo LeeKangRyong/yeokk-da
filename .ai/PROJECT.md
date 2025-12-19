@@ -6,7 +6,7 @@
 ## Repository
 
 ```
-Repository: https://github.com/YOUR_USERNAME/yeokk-da
+Repository: https://github.com/LeeKangRyong/yeokk-da
 Branch: main
 ```
 
@@ -189,8 +189,8 @@ Backend: api.yeokk-da.com → yeokk-da-backend.azurewebsites.net
 ## Setup Checklist
 
 ### Initial Setup
-- [ ] Create GitHub repository
-- [ ] Setup Netlify site
+- [x] Create GitHub repository
+- [x] Setup Netlify site
 - [ ] Create Azure Resource Group
 - [ ] Setup Azure App Service (Backend)
 - [ ] Create PostgreSQL database

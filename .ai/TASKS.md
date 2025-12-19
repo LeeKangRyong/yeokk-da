@@ -3,11 +3,11 @@
 ## 🎯 Phase 1: MVP (Weeks 1-6)
 
 ### ✅ Week 1-2: Foundation (DONE)
-- [x] Project setup (Next.js + Nest.js)
-- [x] Google OAuth
-- [x] Prisma schema
-- [x] Azure resources
-- [x] CI/CD pipeline
+- [ ] Project setup (Next.js + Nest.js)
+- [ ] Google OAuth
+- [ ] Prisma schema
+- [ ] Azure resources
+- [ ] CI/CD pipeline
 
 ### 🚧 Week 3-4: Core Features (IN PROGRESS)
 
