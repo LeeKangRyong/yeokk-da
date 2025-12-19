@@ -27,10 +27,10 @@
 - [ ] 우선순위 설정
 
 #### 기초 웹 설정
-- [ ] Frontend 기본 레이아웃
-  - [ ] Header/Navigation
-  - [ ] Footer
-  - [ ] 기본 라우팅 구조
+- [x] Frontend 기본 레이아웃 ✅ (2025-12-20)
+  - [x] Header/Navigation (YD-16)
+  - [x] Footer (YD-17)
+  - [x] 기본 라우팅 구조 (YD-18)
 - [ ] Backend 기본 구조
   - [ ] 헬스 체크 엔드포인트
   - [ ] 에러 핸들링 미들웨어
