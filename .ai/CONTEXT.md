@@ -16,7 +16,6 @@
 - **ORM**: Prisma 5.8
 - **Database**: PostgreSQL 15
 - **Cache**: Redis (BullMQ)
-- **Video**: FFmpeg
 - **Images**: Sharp
 - **Deploy**: Azure App Service
 
@@ -146,9 +145,8 @@ FRONTEND_URL=https://yeokk-da.netlify.app
 2. Backend calls Claude API for analysis
 3. AI returns { moodTag, intensity, themeTag, storyLine }
 4. Save to DB
-5. Queue video generation job (BullMQ)
-6. FFmpeg renders video → Azure Blob
-7. Update DB with videoUrl
+5. Generate interactive page with animations
+6. Return memory ID with layout config
 ```
 
 ### Integration Import
@@ -158,17 +156,13 @@ FRONTEND_URL=https://yeokk-da.netlify.app
 3. Normalize to UnifiedPost format
 4. Store in MemorySource
 5. Trigger AI analysis
-6. Create Memory
+6. Create Memory with animation theme
 ```
 
 ### Video Generation
 ```
-1. BullMQ picks up job
-2. Download images from Azure Blob
-3. Build FFmpeg command (Ken Burns + transitions)
-4. Render video
-5. Upload to Azure Blob
-6. Update Memory.videoUrl
+비디오 생성 기능은 제거되었습니다.
+대신 스크롤 기반 인터랙티브 페이지로 대체됩니다.
 ```
 
 ---
@@ -199,7 +193,7 @@ backend/src/
 
 - API response: p95 < 200ms
 - Page load: LCP < 2.5s
-- Video generation: < 3 minutes
+- Animation FPS: > 60fps
 - Uptime: > 99.5%
 
 ---

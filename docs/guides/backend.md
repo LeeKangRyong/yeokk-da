@@ -9,7 +9,6 @@ backend/src/
 ├── memories/        # Memory CRUD
 ├── integrations/    # Instagram, Spotify
 ├── ai/              # Claude API
-├── video/           # FFmpeg processing
 └── shared/
     ├── prisma/      # Database
     └── utils/       # Helpers
@@ -93,31 +92,36 @@ npx prisma migrate dev --name add_new_field
 npx prisma migrate deploy
 ```
 
-### Add External API
+### AI Analysis Service
 
 ```typescript
 @Injectable()
-export class InstagramService {
-  async connect(code: string) {
-    // OAuth flow
-    const token = await this.exchangeCode(code);
-    return token;
-  }
+export class AiService {
+  constructor(
+    private readonly anthropic: AnthropicClient,
+  ) {}
 
-  async importPosts(accessToken: string) {
-    // Fetch from API
-    const posts = await this.fetchPosts(accessToken);
-    
-    // Normalize
-    return posts.map(this.normalize);
-  }
+  async analyzeMemory(content: string, images: string[]) {
+    const response = await this.anthropic.messages.create({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'text', text: `Analyze this memory and provide:
+            - moodTag (string): emotion (e.g., "행복", "그리움")
+            - intensity (number): 0-100
+            - themeTag (string): theme (e.g., "여행", "성장")
+            - storyLine (string): 3-5 sentence story
+            - animationTheme (string): "happy" | "nostalgic" | "exciting" | "peaceful"
+            
+            Content: ${content}` },
+          ...images.map(url => ({ type: 'image', source: { type: 'url', url } }))
+        ]
+      }],
+    });
 
-  private normalize(post: any): UnifiedPost {
-    return {
-      platform: 'instagram',
-      content: { text: post.caption },
-      // ...
-    };
+    return JSON.parse(response.content[0].text);
   }
 }
 ```
@@ -204,22 +208,33 @@ async getMemory(id: string) {
 }
 ```
 
-### Job Queue
+### Job Queue (Async Processing)
 
 ```typescript
-// Add job
-await this.videoQueue.add('generate', {
+// Add job for AI analysis
+await this.aiQueue.add('analyze', {
   memoryId: '123',
-  config: { duration: 60 },
+  priority: 'high',
 });
 
 // Process job
-@Processor('video-generation')
-export class VideoProcessor {
-  @Process('generate')
+@Processor('ai-analysis')
+export class AiProcessor {
+  @Process('analyze')
   async handle(job: Job) {
     const { memoryId } = job.data;
-    await this.generateVideo(memoryId);
+    const memory = await this.prisma.memory.findUnique({ where: { id: memoryId } });
+    const analysis = await this.aiService.analyzeMemory(memory.content, memory.images);
+    
+    await this.prisma.memory.update({
+      where: { id: memoryId },
+      data: {
+        moodTag: analysis.moodTag,
+        intensity: analysis.intensity,
+        themeTag: analysis.themeTag,
+        animationTheme: analysis.animationTheme,
+      },
+    });
   }
 }
 ```

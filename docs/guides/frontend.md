@@ -88,35 +88,98 @@ export function MemoryCard({ memory, onClick }: MemoryCardProps) {
 }
 ```
 
-### Add Framer Motion Animation
+### Advanced Framer Motion Animations
+
+#### Scroll-driven Animations
 
 ```tsx
-// Timeline layout
-export function TimelineLayout({ memories }: TimelineLayoutProps) {
+import { useScroll, useTransform, motion } from 'framer-motion';
+
+export function ScrollReveal({ children }: { children: React.ReactNode }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
+  
   return (
-    <motion.div
-      initial="hidden"
-      animate="show"
-      variants={{
-        hidden: { opacity: 0 },
-        show: {
-          opacity: 1,
-          transition: { staggerChildren: 0.1 },
-        },
-      }}
-    >
+    <motion.div ref={ref} style={{ opacity, y }}>
+      {children}
+    </motion.div>
+  );
+}
+```
+
+#### Shared Layout Animations
+
+```tsx
+// List view
+export function MemoryList({ memories }: Props) {
+  return (
+    <AnimatePresence>
       {memories.map((memory) => (
         <motion.div
           key={memory.id}
-          variants={{
-            hidden: { opacity: 0, y: 50 },
-            show: { opacity: 1, y: 0 },
-          }}
+          layoutId={`memory-${memory.id}`}
+          onClick={() => router.push(`/memories/${memory.id}`)}
         >
           <MemoryCard memory={memory} />
         </motion.div>
       ))}
+    </AnimatePresence>
+  );
+}
+
+// Detail view
+export function MemoryDetail({ memory }: Props) {
+  return (
+    <motion.div layoutId={`memory-${memory.id}`}>
+      <MemoryDetailContent memory={memory} />
     </motion.div>
+  );
+}
+```
+
+#### Dynamic Theme Backgrounds
+
+```tsx
+export function ThemeBackground({ theme }: { theme: string }) {
+  const particles = useMemo(() => {
+    if (theme === 'happy') return <HappyParticles />;
+    if (theme === 'nostalgic') return <NostalgicFog />;
+    return <DefaultGradient />;
+  }, [theme]);
+  
+  return (
+    <motion.div
+      className="fixed inset-0 -z-10"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+    >
+      {particles}
+    </motion.div>
+  );
+}
+```
+
+#### Parallax Scrolling
+
+```tsx
+export function ParallaxSection({ image, children }: Props) {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 1000], [0, -200]);
+  
+  return (
+    <div className="relative h-screen overflow-hidden">
+      <motion.div style={{ y }} className="absolute inset-0">
+        <Image src={image} fill className="object-cover" />
+      </motion.div>
+      <div className="relative z-10">{children}</div>
+    </div>
   );
 }
 ```
@@ -247,6 +310,53 @@ describe('MemoryCard', () => {
     expect(handleClick).toHaveBeenCalledWith('1');
   });
 });
+```
+
+---
+
+## Animation Performance
+
+### GPU Acceleration
+
+```tsx
+// Use transform and opacity for better performance
+<motion.div
+  style={{
+    transform: 'translateZ(0)', // Force GPU acceleration
+  }}
+  animate={{
+    x: 100,
+    opacity: 0.5,
+  }}
+/>
+```
+
+### Reduce Motion Support
+
+```tsx
+import { useReducedMotion } from 'framer-motion';
+
+export function AnimatedCard() {
+  const shouldReduceMotion = useReducedMotion();
+  
+  return (
+    <motion.div
+      animate={shouldReduceMotion ? {} : { scale: 1.05 }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
+    />
+  );
+}
+```
+
+### Layout Shift Prevention
+
+```tsx
+// Use layoutId to prevent layout shifts
+<motion.div
+  layout
+  layoutId="unique-id"
+  transition={{ layout: { duration: 0.3 } }}
+/>
 ```
 
 ---

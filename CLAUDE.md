@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 **엮다 (Yeokk-da)** is an AI-powered memory platform that weaves scattered digital footprints into cohesive stories. It integrates data from SNS, music streaming, Notion, and personal content to create:
-- Dynamic memory pages with Framer Motion animations
-- Auto-generated 1-minute emotional videos
+- Scroll-driven interactive storytelling with Framer Motion
+- AI theme-based dynamic background animations
+- Magical shared layout transitions between memory cards
 - AI-based categorization and analysis
 - Easy sharing capabilities
 
@@ -24,13 +25,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Backend
 - Nest.js 10.3, Prisma 5.8
 - PostgreSQL 15, Redis (BullMQ)
-- FFmpeg (video), Sharp (images)
+- Sharp (images)
 - Deploy: Azure App Service
 
 ### External APIs
 - Claude 3.5 Sonnet (Anthropic)
-- Instagram Graph API, Twitter API v2, Facebook Graph API
-- Spotify Web API, Notion API
+- Instagram Graph API, Facebook Graph API
+- Spotify Web API
 
 ### Infrastructure
 - Frontend: Netlify
@@ -104,11 +105,10 @@ External APIs (Claude, Instagram, Spotify, Notion, Twitter)
 **Memory Creation:**
 1. User uploads text + images
 2. Backend calls Claude API for emotion/theme analysis
-3. AI returns `{ moodTag, intensity, themeTag, storyLine }`
+3. AI returns `{ moodTag, intensity, themeTag, storyLine, animationTheme }`
 4. Save to database
-5. Queue video generation job (BullMQ)
-6. FFmpeg renders video → Azure Blob Storage
-7. Update database with videoUrl
+5. Generate interactive page config with animations
+6. Return memory with layout and animation settings
 
 **Integration Import:**
 1. OAuth flow (Instagram/Spotify/Notion)
@@ -116,7 +116,7 @@ External APIs (Claude, Instagram, Spotify, Notion, Twitter)
 3. Normalize to UnifiedPost format
 4. Store in MemorySource
 5. Trigger AI analysis
-6. Create Memory
+6. Create Memory with animation theme based on mood
 
 **Video Generation:**
 1. BullMQ picks up job
@@ -345,21 +345,21 @@ export class MemoriesController {
 }
 ```
 
-### Backend: Queue Jobs with BullMQ
+### Backend: Queue Jobs with BullMQ (for async processing)
 ```typescript
-// Add job
-await this.videoQueue.add('generate', {
+// Add job for AI analysis
+await this.aiQueue.add('analyze', {
   memoryId: '123',
-  config: { duration: 60 },
+  priority: 'high',
 });
 
 // Process job
-@Processor('video-generation')
-export class VideoProcessor {
-  @Process('generate')
+@Processor('ai-analysis')
+export class AiProcessor {
+  @Process('analyze')
   async handle(job: Job) {
     const { memoryId } = job.data;
-    await this.generateVideo(memoryId);
+    await this.analyzeMemory(memoryId);
   }
 }
 ```
@@ -392,7 +392,7 @@ export class InstagramService {
 
 - API response: p95 < 200ms
 - Page load: LCP < 2.5s
-- Video generation: < 3 minutes
+- Animation FPS: > 60fps (smooth animations)
 - Uptime: > 99.5%
 
 ## Environment Variables
