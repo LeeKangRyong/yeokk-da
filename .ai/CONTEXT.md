@@ -22,9 +22,8 @@
 
 ### External APIs
 - **AI**: Claude 3.5 Sonnet (Anthropic)
-- **Social**: Instagram Graph API, Twitter API v2, Facebook Graph API
+- **Social**: Instagram Graph API, Facebook Graph API
 - **Music**: Spotify Web API
-- **Productivity**: Notion API
 
 ### Infrastructure
 - **Frontend**: Netlify
@@ -51,7 +50,7 @@ Nest.js Backend (yeokk-da-backend.azurewebsites.net)
 PostgreSQL    Azure Blob         Redis
 (Prisma)      Storage            (BullMQ)
     │
-    └─> External APIs (Claude, Instagram, Spotify, Notion, Twitter)
+    └─> External APIs (Claude, Instagram, Spotify)
 ```
 
 ---
@@ -210,3 +209,11 @@ backend/src/
 - **Frontend**: https://yeokk-da.netlify.app
 - **Backend**: https://yeokk-da-backend.azurewebsites.net
 - **Share Pages**: https://yeokk-da.netlify.app/s/:token
+
+---
+
+## AI API Configuration (FactChat)
+- **Provider**: FactChat (Mindlogic) 통합 API
+- **Base URL**: `https://factchat-cloud.mindlogic.ai/v1/api` 
+- **Model**: `claude-sonnet-4-5-20250929`
+- **Usage**: Anthropic SDK를 사용하되 반드시 `baseURL`을 위 주소로 덮어써야 함.

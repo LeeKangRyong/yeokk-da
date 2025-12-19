@@ -4,7 +4,7 @@
 
 **엮다**는 흩어진 디지털 발자취를 하나의 이야기로 엮어내는 AI 추억 플랫폼입니다.
 
-사용자의 SNS, 음악 스트리밍, 노션, 개인 콘텐츠를 AI가 분석하여:
+사용자의 SNS, 음악 스트리밍, 개인 콘텐츠를 AI가 분석하여:
 - 역동적인 추억 페이지 (Framer Motion)
 - 1분 감성 영상 (자동 생성)
 - 자동 정리 & 분류
@@ -32,9 +32,8 @@
 
 1. **다양한 입력**
    - 직접 입력: 텍스트 + 이미지
-   - SNS 연동: Instagram, Twitter, Facebook
+   - SNS 연동: Instagram
    - 음악: Spotify
-   - 노션: 페이지 임포트
 
 2. **AI 통합 분석**
    - Claude API가 모든 데이터 분석
@@ -149,8 +148,7 @@
 - Week 5-6: Instagram 연동
 
 ### Phase 2: 음악 & 고도화 (4주)
-- Week 7-8: Spotify 연동
-- Week 9-10: Notion + Twitter
+- Week 7-10: Spotify 연동
 
 ### Phase 3: 공유 & 최적화 (3주)
 - Week 11-12: 공유 기능

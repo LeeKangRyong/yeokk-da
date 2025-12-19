@@ -56,7 +56,6 @@
 ## 🔜 Next: Phase 2 (Weeks 7-10)
 
 - Spotify integration
-- Notion integration
 - Video generation (FFmpeg)
 - Enhanced animations
 

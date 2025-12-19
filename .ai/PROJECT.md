@@ -19,14 +19,14 @@ Branch: main
 URL: https://yeokk-da.netlify.app
 Build Command: npm run build
 Publish Directory: .next
-Node Version: 20
+Node Version: 24
 ```
 
 ### Backend (Azure App Service)
 ```
 Name: yeokk-da-backend
 URL: https://yeokk-da-backend.azurewebsites.net
-Runtime: Node 20 LTS
+Runtime: Node 24 LTS
 ```
 
 ---
@@ -94,15 +94,12 @@ GOOGLE_CLIENT_SECRET=[FILL_IN]
 JWT_SECRET=[GENERATE_RANDOM_STRING]
 
 # External APIs
-ANTHROPIC_API_KEY=sk-ant-[FILL_IN]
+ANTHROPIC_API_KEY=[FILL_IN]
+ANTHROPIC_API_BASE=https://factchat-cloud.mindlogic.ai/v1/api
 INSTAGRAM_CLIENT_ID=[FILL_IN]
 INSTAGRAM_CLIENT_SECRET=[FILL_IN]
 SPOTIFY_CLIENT_ID=[FILL_IN]
 SPOTIFY_CLIENT_SECRET=[FILL_IN]
-NOTION_CLIENT_ID=[FILL_IN]
-NOTION_CLIENT_SECRET=[FILL_IN]
-TWITTER_CLIENT_ID=[FILL_IN]
-TWITTER_CLIENT_SECRET=[FILL_IN]
 
 # Azure Storage
 AZURE_STORAGE_CONNECTION_STRING=[FILL_IN]
@@ -137,20 +134,6 @@ Valid OAuth Redirect URIs:
 Redirect URIs:
 - https://yeokk-da-backend.azurewebsites.net/api/integrations/spotify/callback
 - http://localhost:3001/api/integrations/spotify/callback (development)
-```
-
-### Notion
-```
-Redirect URIs:
-- https://yeokk-da-backend.azurewebsites.net/api/integrations/notion/callback
-- http://localhost:3001/api/integrations/notion/callback (development)
-```
-
-### Twitter
-```
-Callback URLs:
-- https://yeokk-da-backend.azurewebsites.net/api/integrations/twitter/callback
-- http://localhost:3001/api/integrations/twitter/callback (development)
 ```
 
 ---
@@ -202,8 +185,6 @@ Backend: api.yeokk-da.com → yeokk-da-backend.azurewebsites.net
 - [ ] Google OAuth app
 - [ ] Instagram app
 - [ ] Spotify app
-- [ ] Notion integration
-- [ ] Twitter app
 
 ### Secrets & Keys
 - [ ] Generate JWT secret

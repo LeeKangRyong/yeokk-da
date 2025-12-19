@@ -7,7 +7,7 @@ backend/src/
 ├── auth/            # Google OAuth, JWT
 ├── users/           # User management
 ├── memories/        # Memory CRUD
-├── integrations/    # Instagram, Spotify, Notion, Twitter
+├── integrations/    # Instagram, Spotify
 ├── ai/              # Claude API
 ├── video/           # FFmpeg processing
 └── shared/
