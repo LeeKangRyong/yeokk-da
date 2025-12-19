@@ -11,6 +11,15 @@ SNS, 음악 스트리밍, 개인 콘텐츠를 AI가 분석하여:
 - **자동 정리 & 분류**
 - **간편한 공유**
 
+## 🎯 개발 목적
+본 프로젝트는 AI Agent 기반의 차세대 개발 워크플로우를 탐색하고 실현하기 위해 개발하였습니다.
+
+- AI-Native Development: **Claude Code 및 JIRA/Confluence MCP를 활용**하여 기획부터 구현까지 AI와 협업하는 프로세스 구축
+
+- Systematic Agent Interaction: `.ai` 컨텍스트 파일 구조를 통한 에이전트 가이드라인 최적화 및 태스크 자동화 실험
+
+- Modern Web Stack Mastery: `Next.js 15`와 `Nest.js`를 활용한 고성능 풀스택 애플리케이션 구현
+
 ## 🚀 Quick Start
 
 ```bash
