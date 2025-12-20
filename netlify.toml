@@ -7,6 +7,9 @@
 
   # Base directory - frontend 폴더에서 빌드
   base = "frontend"
+  
+  # Publish directory - Next.js 빌드 결과물
+  publish = ".next"
 
   # Environment variables during build
   [build.environment]
