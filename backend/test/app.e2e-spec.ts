@@ -53,8 +53,11 @@ describe('App (e2e)', () => {
         expect(response.body).toHaveProperty('status');
         expect(response.body).toHaveProperty('info');
         expect(response.body).toHaveProperty('details');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(response.body.info).toHaveProperty('memory_heap');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(response.body.info).toHaveProperty('memory_rss');
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(response.body.info).toHaveProperty('storage');
       } else {
         // Unhealthy response is transformed by error filter
@@ -72,6 +75,7 @@ describe('App (e2e)', () => {
 
       expect(response.body).toHaveProperty('status');
       expect(response.body).toHaveProperty('info');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(response.body.info).toHaveProperty('memory_heap');
     });
 
