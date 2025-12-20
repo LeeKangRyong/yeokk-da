@@ -47,13 +47,6 @@ jobs:
         NEXTAUTH_URL: https://yeokk-da.netlify.app
         NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
-    
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/.next
-        retention-days: 1
 
   # Backend 빌드 및 테스트
   backend-build:
@@ -118,11 +111,14 @@ jobs:
       working-directory: ./frontend
       run: npm ci
 
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/.next
+    - name: Build
+      working-directory: ./frontend
+      run: npm run build
+      env:
+        NEXT_PUBLIC_API_URL: https://yeokk-da-backend.azurewebsites.net
+        NEXTAUTH_URL: https://yeokk-da.netlify.app
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
 
     - name: Deploy to Netlify
       uses: nwtgck/actions-netlify@v2
