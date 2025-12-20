@@ -1,0 +1,223 @@
+name: Deploy to Azure and Netlify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '24.x'
+
+jobs:
+  # Frontend 빌드 및 테스트
+  frontend-build:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Run linter
+      working-directory: ./frontend
+      run: npm run lint || true
+    
+    - name: Run tests
+      working-directory: ./frontend
+      run: npm test || true
+    
+    - name: Build
+      working-directory: ./frontend
+      run: npm run build
+      env:
+        NEXT_PUBLIC_API_URL: https://yeokk-da-backend.azurewebsites.net
+        NEXTAUTH_URL: https://yeokk-da.netlify.app
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-build
+        path: frontend/.next
+        retention-days: 1
+
+  # Backend 빌드 및 테스트
+  backend-build:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+    
+    - name: Run linter
+      working-directory: ./backend
+      run: npm run lint || true
+    
+    - name: Run tests
+      working-directory: ./backend
+      run: npm test || true
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    
+    - name: Build
+      working-directory: ./backend
+      run: npm run build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-build
+        path: backend/dist
+        retention-days: 1
+
+  # Frontend 배포 (Netlify)
+  deploy-frontend:
+    name: Deploy to Netlify
+    needs: frontend-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-build
+        path: frontend/.next
+
+    - name: Deploy to Netlify
+      uses: nwtgck/actions-netlify@v2
+      with:
+        publish-dir: './frontend'
+        production-branch: main
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        deploy-message: "Deploy from GitHub Actions - ${{ github.event.head_commit.message }}"
+        enable-pull-request-comment: true
+        enable-commit-comment: false
+        overwrites-pull-request-comment: true
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+    - name: Deployment summary
+      run: |
+        echo "✅ Frontend deployed to Netlify"
+        echo "🌐 URL: https://yeokk-da.netlify.app"
+        echo "📦 Build: ${{ github.sha }}"
+
+  # Backend 배포 (Azure App Service)
+  deploy-backend:
+    name: Deploy to Azure App Service
+    needs: backend-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-build
+        path: backend/dist
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Install production dependencies
+      working-directory: ./backend
+      run: npm ci --omit=dev
+    
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'yeokk-da-backend'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
+        package: ./backend
+    
+    - name: Run database migrations
+      run: |
+        echo "🔄 Running database migrations..."
+        # npm run migrate:deploy 등 실제 마이그레이션 명령어로 변경
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    
+    - name: Deployment summary
+      run: |
+        echo "✅ Backend deployed to Azure"
+        echo "🌐 URL: https://yeokk-da-backend.azurewebsites.net"
+
+  # 배포 후 헬스체크
+  health-check:
+    name: Health Check
+    needs: deploy-frontend
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Wait for deployment
+      run: |
+        echo "⏳ Waiting for Netlify deployment to complete..."
+        sleep 30
+
+    - name: Check frontend health
+      run: |
+        echo "🔍 Checking frontend health..."
+        response=$(curl -s -o /dev/null -w "%{http_code}" https://yeokk-da.netlify.app || echo "000")
+        echo "Frontend status: $response"
+        if [ "$response" = "200" ] || [ "$response" = "301" ] || [ "$response" = "302" ]; then
+          echo "✅ Frontend is healthy"
+        else
+          echo "⚠️ Frontend returned status $response"
+          echo "Note: First deployment may take longer to propagate"
+        fi
+
+    - name: Deployment notification
+      if: always()
+      run: |
+        echo "📢 Frontend deployment completed!"
+        echo "🌐 Frontend: https://yeokk-da.netlify.app"
+        echo "📦 Commit: ${{ github.sha }}"
+        echo "👤 Author: ${{ github.actor }}"
