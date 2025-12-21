@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AnthropicService } from '../shared/services/anthropic.service';
+import { OpenAiService } from '../shared/services/openai.service';
 import {
   StartInterviewDto,
   StartInterviewResponseDto,
@@ -14,14 +14,14 @@ import {
 export class AiService {
   private readonly logger = new Logger(AiService.name);
 
-  constructor(private readonly anthropicService: AnthropicService) {}
+  constructor(private readonly openaiService: OpenAiService) {}
 
   async startInterview(
     dto: StartInterviewDto,
   ): Promise<StartInterviewResponseDto> {
     this.logger.log('Starting AI interview');
 
-    const result = await this.anthropicService.startInterview(
+    const result = await this.openaiService.startInterview(
       dto.initialContext,
     );
 
@@ -34,7 +34,7 @@ export class AiService {
   async processChat(dto: ChatDto): Promise<ChatResponseDto> {
     this.logger.log('Processing chat message');
 
-    const result = await this.anthropicService.processChat(
+    const result = await this.openaiService.processChat(
       dto.conversationHistory,
       dto.userMessage,
     );
@@ -51,7 +51,7 @@ export class AiService {
   ): Promise<GenerateStoryResponseDto> {
     this.logger.log('Generating story from conversation');
 
-    const result = await this.anthropicService.generateStory(
+    const result = await this.openaiService.generateStory(
       dto.conversationHistory,
     );
 

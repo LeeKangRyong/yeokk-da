@@ -1,7 +1,7 @@
 export function validateEnvironment() {
   const required = [
     'DATABASE_URL',
-    'ANTHROPIC_API_KEY',
+    'OPENAI_API_KEY',
     'AZURE_STORAGE_CONNECTION_STRING',
     'JWT_SECRET',
   ];

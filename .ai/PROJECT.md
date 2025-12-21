@@ -94,10 +94,7 @@ GOOGLE_CLIENT_SECRET=[FILL_IN]
 JWT_SECRET=[GENERATE_RANDOM_STRING]
 
 # External APIs
-ANTHROPIC_API_KEY=[FILL_IN]
-ANTHROPIC_API_BASE=https://factchat-cloud.mindlogic.ai/v1/api
-INSTAGRAM_CLIENT_ID=[FILL_IN]
-INSTAGRAM_CLIENT_SECRET=[FILL_IN]
+OPENAI_API_KEY=[FILL_IN]
 SPOTIFY_CLIENT_ID=[FILL_IN]
 SPOTIFY_CLIENT_SECRET=[FILL_IN]
 
@@ -122,18 +119,11 @@ Authorized redirect URIs:
 - http://localhost:3000/api/auth/callback/google (development)
 ```
 
-### Instagram
-```
-Valid OAuth Redirect URIs:
-- https://yeokk-da-backend.azurewebsites.net/api/integrations/instagram/callback
-- http://localhost:3001/api/integrations/instagram/callback (development)
-```
-
 ### Spotify
 ```
 Redirect URIs:
-- https://yeokk-da-backend.azurewebsites.net/api/integrations/spotify/callback
-- http://localhost:3001/api/integrations/spotify/callback (development)
+- https://yeokk-da-backend.azurewebsites.net/api/spotify/callback
+- http://localhost:3001/api/spotify/callback (development)
 ```
 
 ---
@@ -183,7 +173,6 @@ Backend: api.yeokk-da.com → yeokk-da-backend.azurewebsites.net
 
 ### OAuth Apps
 - [ ] Google OAuth app
-- [ ] Instagram app
 - [ ] Spotify app
 
 ### Secrets & Keys

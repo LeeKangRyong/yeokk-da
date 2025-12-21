@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**엮다 (Yeokk-da)** is an AI-powered memory platform that weaves scattered digital footprints into cohesive stories. It integrates data from SNS, music streaming, Notion, and personal content to create:
-- Scroll-driven interactive storytelling with Framer Motion
+**엮다 (Yeokk-da)** is an AI-powered memory platform that weaves photos and music into cinematic stories through interactive AI conversations. It creates:
+- Gamified AI interview for memory reconstruction
+- Spotify BGM curation with radio dial exploration
+- Scroll-driven cinematic storytelling with Framer Motion
 - AI theme-based dynamic background animations
-- Magical shared layout transitions between memory cards
-- AI-based categorization and analysis
-- Easy sharing capabilities
+- Multi-channel SNS sharing (Instagram Story, link sharing with OG tags)
 
 **URL:** https://yeokk-da.netlify.app
 
@@ -29,8 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Deploy: Azure App Service
 
 ### External APIs
-- Claude 3.5 Sonnet (Anthropic)
-- Instagram Graph API, Facebook Graph API
+- GPT-4o (OpenAI)
 - Spotify Web API
 
 ### Infrastructure
@@ -97,34 +96,20 @@ Nest.js Backend (yeokk-da-backend.azurewebsites.net)
     ↓
 PostgreSQL, Azure Blob Storage, Redis
     ↓
-External APIs (Claude, Instagram, Spotify, Notion, Twitter)
+External APIs (OpenAI, Spotify)
 ```
 
 ### Core Flows
 
 **Memory Creation:**
-1. User uploads text + images
-2. Backend calls Claude API for emotion/theme analysis
-3. AI returns `{ moodTag, intensity, themeTag, storyLine, animationTheme }`
-4. Save to database
-5. Generate interactive page config with animations
-6. Return memory with layout and animation settings
-
-**Integration Import:**
-1. OAuth flow (Instagram/Spotify/Notion)
-2. Fetch user data from external API
-3. Normalize to UnifiedPost format
-4. Store in MemorySource
-5. Trigger AI analysis
-6. Create Memory with animation theme based on mood
-
-**Video Generation:**
-1. BullMQ picks up job
-2. Download images from Azure Blob
-3. Build FFmpeg command (Ken Burns + transitions)
-4. Render video
-5. Upload to Azure Blob
-6. Update Memory.videoUrl
+1. User uploads images (up to 10) and initial memory fragments
+2. AI conducts interactive interview, asking questions about the photos
+3. User responds through chat interface, building up the narrative
+4. AI analyzes conversation and returns `{ moodTag, intensity, themeTag, storyLine, animationTheme }`
+5. User explores Spotify recommendations with radio dial UI based on mood
+6. User selects final BGM and confirms
+7. Generate cinematic page with scroll-driven animations and theme background
+8. Save to database with selected music and animation settings
 
 ### Key Database Models
 
@@ -134,29 +119,23 @@ model User {
   email       String    @unique
   googleId    String    @unique
   memories    Memory[]
-  integrations Integration[]
 }
 
 model Memory {
-  id          String   @id @default(cuid())
-  userId      String
-  title       String
-  videoUrl    String?
-  moodTag     String      // "행복", "그리움"
-  intensity   Int         // 0-100
-  themeTag    String      // "여행", "성장"
-  sources     MemorySource[]
+  id              String   @id @default(cuid())
+  userId          String
+  title           String
+  content         String   @db.Text
+  moodTag         String      // "행복", "그리움"
+  intensity       Int         // 0-100
+  themeTag        String      // "여행", "성장"
+  storyLine       String   @db.Text
+  animationTheme  String      // "happy", "nostalgic", "exciting", "peaceful"
+  spotifyTrackId  String?     // Selected BGM from Spotify
+  images          String[]    // Array of image URLs
+  shareToken      String?  @unique
 
-  @@index([userId, memoryDate])
-}
-
-model Integration {
-  id          String   @id @default(cuid())
-  userId      String
-  platform    String   // 'instagram', 'spotify', 'notion'
-  accessToken String   @db.Text
-
-  @@unique([userId, platform])
+  @@index([userId, createdAt])
 }
 ```
 
@@ -167,15 +146,20 @@ model Integration {
 POST   /api/auth/google
 GET    /api/auth/me
 
-# Integrations
-POST   /api/integrations/:platform/connect
-POST   /api/integrations/:platform/import
-
 # Memories
 GET    /api/memories
 POST   /api/memories
 GET    /api/memories/:id
 POST   /api/memories/upload
+
+# AI Interview
+POST   /api/ai/interview/start
+POST   /api/ai/interview/message
+POST   /api/ai/interview/analyze
+
+# Spotify
+GET    /api/spotify/recommendations
+GET    /api/spotify/track/:id
 
 # Share
 POST   /api/memories/:id/share
@@ -257,9 +241,9 @@ backend/src/
 ├── auth/            # Authentication (Google OAuth, JWT)
 ├── users/           # User management
 ├── memories/        # Memory CRUD operations
-├── integrations/    # External API integrations (Instagram, Spotify, Notion, Twitter)
-├── ai/              # Claude API integration
-├── video/           # FFmpeg video processing
+├── ai/              # Claude API integration (AI interview)
+├── spotify/         # Spotify API integration (music recommendations)
+├── share/           # Share token generation and OG tag handling
 └── shared/
     ├── prisma/      # Database client and schemas
     └── utils/       # Shared utilities
@@ -345,45 +329,73 @@ export class MemoriesController {
 }
 ```
 
-### Backend: Queue Jobs with BullMQ (for async processing)
+### Backend: AI Interview Service Pattern
 ```typescript
-// Add job for AI analysis
-await this.aiQueue.add('analyze', {
-  memoryId: '123',
-  priority: 'high',
-});
+@Injectable()
+export class OpenAiService {
+  constructor(private readonly client: OpenAI) {}
 
-// Process job
-@Processor('ai-analysis')
-export class AiProcessor {
-  @Process('analyze')
-  async handle(job: Job) {
-    const { memoryId } = job.data;
-    await this.analyzeMemory(memoryId);
+  async startInterview(initialContext?: string) {
+    const completion = await this.client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'user', content: `Start an interview about these memories...` }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.8,
+    });
+    return JSON.parse(completion.choices[0].message.content);
+  }
+
+  async processChat(conversationHistory, userMessage: string) {
+    const completion = await this.client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: 'You are an empathetic interviewer...' },
+        ...conversationHistory,
+        { role: 'user', content: userMessage }
+      ],
+      response_format: { type: 'json_object' },
+    });
+    return JSON.parse(completion.choices[0].message.content);
+  }
+
+  async generateStory(conversationHistory) {
+    const completion = await this.client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        ...conversationHistory,
+        { role: 'user', content: 'Analyze and create story...' }
+      ],
+      response_format: { type: 'json_object' },
+    });
+    return JSON.parse(completion.choices[0].message.content);
   }
 }
 ```
 
-### Backend: External API Integration Pattern
+### Backend: Spotify Integration Pattern
 ```typescript
 @Injectable()
-export class InstagramService {
-  async connect(code: string) {
-    const token = await this.exchangeCode(code);
-    return token;
+export class SpotifyService {
+  async getRecommendations(mood: string, intensity: number) {
+    const params = this.mapMoodToSpotifyParams(mood, intensity);
+    const tracks = await this.spotifyApi.getRecommendations(params);
+    return tracks.map(track => ({
+      id: track.id,
+      name: track.name,
+      artist: track.artists[0].name,
+      previewUrl: track.preview_url,
+    }));
   }
 
-  async importPosts(accessToken: string) {
-    const posts = await this.fetchPosts(accessToken);
-    return posts.map(this.normalize);
-  }
-
-  private normalize(post: any): UnifiedPost {
-    return {
-      platform: 'instagram',
-      content: { text: post.caption },
-      // ...normalize to common format
+  private mapMoodToSpotifyParams(mood: string, intensity: number) {
+    const moodMap = {
+      '행복': { valence: 0.8, energy: intensity / 100 },
+      '그리움': { valence: 0.3, energy: 0.4 },
+      // ...other moods
     };
+    return moodMap[mood] || { valence: 0.5, energy: 0.5 };
   }
 }
 ```

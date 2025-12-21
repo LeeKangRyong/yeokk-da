@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiService } from './ai.service';
-import { AnthropicService } from '../shared/services/anthropic.service';
+import { OpenAiService } from '../shared/services/openai.service';
 
 describe('AiService', () => {
   let service: AiService;
-  let anthropicService: AnthropicService;
+  let openaiService: OpenAiService;
 
-  const mockAnthropicService = {
+  const mockOpenAiService = {
     startInterview: jest.fn(),
     processChat: jest.fn(),
     generateStory: jest.fn(),
@@ -18,14 +18,14 @@ describe('AiService', () => {
       providers: [
         AiService,
         {
-          provide: AnthropicService,
-          useValue: mockAnthropicService,
+          provide: OpenAiService,
+          useValue: mockOpenAiService,
         },
       ],
     }).compile();
 
     service = module.get<AiService>(AiService);
-    anthropicService = module.get<AnthropicService>(AnthropicService);
+    openaiService = module.get<OpenAiService>(OpenAiService);
   });
 
   afterEach(() => {
@@ -37,45 +37,45 @@ describe('AiService', () => {
   });
 
   describe('startInterview', () => {
-    it('should call anthropicService.startInterview and return questions', async () => {
+    it('should call openaiService.startInterview and return questions', async () => {
       const mockResult = {
         questions: ['질문1', '질문2', '질문3'],
         initialGreeting: '안녕하세요!',
       };
 
-      mockAnthropicService.startInterview.mockResolvedValue(mockResult);
+      mockOpenAiService.startInterview.mockResolvedValue(mockResult);
 
       const result = await service.startInterview({});
 
-      expect(anthropicService.startInterview).toHaveBeenCalledWith(undefined);
+      expect(openaiService.startInterview).toHaveBeenCalledWith(undefined);
       expect(result).toEqual(mockResult);
     });
 
-    it('should pass initialContext to anthropicService', async () => {
+    it('should pass initialContext to openaiService', async () => {
       const mockResult = {
         questions: ['질문1'],
         initialGreeting: '안녕하세요!',
       };
 
-      mockAnthropicService.startInterview.mockResolvedValue(mockResult);
+      mockOpenAiService.startInterview.mockResolvedValue(mockResult);
 
       await service.startInterview({ initialContext: '여행 사진입니다' });
 
-      expect(anthropicService.startInterview).toHaveBeenCalledWith(
+      expect(openaiService.startInterview).toHaveBeenCalledWith(
         '여행 사진입니다',
       );
     });
   });
 
   describe('processChat', () => {
-    it('should call anthropicService.processChat and return response', async () => {
+    it('should call openaiService.processChat and return response', async () => {
       const mockResult = {
         response: 'AI 응답입니다',
         suggestedNextQuestions: ['후속 질문1'],
         shouldContinue: true,
       };
 
-      mockAnthropicService.processChat.mockResolvedValue(mockResult);
+      mockOpenAiService.processChat.mockResolvedValue(mockResult);
 
       const dto = {
         conversationHistory: [
@@ -86,7 +86,7 @@ describe('AiService', () => {
 
       const result = await service.processChat(dto);
 
-      expect(anthropicService.processChat).toHaveBeenCalledWith(
+      expect(openaiService.processChat).toHaveBeenCalledWith(
         dto.conversationHistory,
         dto.userMessage,
       );
@@ -95,7 +95,7 @@ describe('AiService', () => {
   });
 
   describe('generateStory', () => {
-    it('should call anthropicService.generateStory and return analysis', async () => {
+    it('should call openaiService.generateStory and return analysis', async () => {
       const mockResult = {
         moodTag: '행복',
         intensity: 80,
@@ -104,7 +104,7 @@ describe('AiService', () => {
         animationTheme: 'happy' as const,
       };
 
-      mockAnthropicService.generateStory.mockResolvedValue(mockResult);
+      mockOpenAiService.generateStory.mockResolvedValue(mockResult);
 
       const dto = {
         conversationHistory: [{ role: 'user' as const, content: '대화 내용' }],
@@ -112,7 +112,7 @@ describe('AiService', () => {
 
       const result = await service.generateStory(dto);
 
-      expect(anthropicService.generateStory).toHaveBeenCalledWith(
+      expect(openaiService.generateStory).toHaveBeenCalledWith(
         dto.conversationHistory,
       );
       expect(result).toEqual(mockResult);

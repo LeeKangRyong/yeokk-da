@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { InternalServerError } from '../exceptions/app.error';
 
 export interface AiAnalysisResult {
@@ -46,49 +46,46 @@ const ANALYSIS_PROMPT = `당신은 추억을 분석하는 AI입니다. 제공된
 - animationTheme는 moodTag에 매칭되는 영어 키워드`;
 
 @Injectable()
-export class AnthropicService {
-  private readonly logger = new Logger(AnthropicService.name);
-  private readonly client: Anthropic;
+export class OpenAiService {
+  private readonly logger = new Logger(OpenAiService.name);
+  private readonly client: OpenAI;
   private readonly model: string;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
-    const baseURL = this.configService.get<string>('ANTHROPIC_API_BASE');
+    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
 
     if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
-    this.client = new Anthropic({
+    this.client = new OpenAI({
       apiKey,
-      baseURL: baseURL || 'https://api.anthropic.com',
     });
 
-    this.model = 'claude-sonnet-4-5-20250929';
+    this.model = 'gpt-4o';
   }
 
   async analyzeMemory(content: string): Promise<AiAnalysisResult> {
     try {
       this.logger.log('Analyzing memory content');
 
-      const messageContent: Anthropic.MessageParam['content'] = [
-        { type: 'text', text: ANALYSIS_PROMPT },
-        { type: 'text', text: `\n\n추억 내용:\n${content}` },
-      ];
-
-      const message = await this.client.messages.create({
+      const completion = await this.client.chat.completions.create({
         model: this.model,
-        max_tokens: 1024,
         messages: [
           {
+            role: 'system',
+            content: ANALYSIS_PROMPT,
+          },
+          {
             role: 'user',
-            content: messageContent,
+            content: `추억 내용:\n${content}`,
           },
         ],
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
       });
 
-      const responseText =
-        message.content[0].type === 'text' ? message.content[0].text : '';
+      const responseText = completion.choices[0]?.message?.content || '';
 
       const result = this.parseAnalysisResponse(responseText);
       this.logger.log(
@@ -104,12 +101,7 @@ export class AnthropicService {
 
   private parseAnalysisResponse(response: string): AiAnalysisResult {
     try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]) as {
+      const parsed = JSON.parse(response) as {
         moodTag?: string;
         intensity?: number;
         themeTag?: string;
@@ -183,19 +175,19 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
 - 질문은 구체적이고 감성적이어야 하며, 사용자가 깊이 생각하도록 유도
 - 순차적으로 물어볼 질문들을 생성 (한 번에 모두 물어보지 않음)`;
 
-      const message = await this.client.messages.create({
+      const completion = await this.client.chat.completions.create({
         model: this.model,
-        max_tokens: 1024,
         messages: [
           {
             role: 'user',
             content: interviewPrompt,
           },
         ],
+        response_format: { type: 'json_object' },
+        temperature: 0.8,
       });
 
-      const responseText =
-        message.content[0].type === 'text' ? message.content[0].text : '';
+      const responseText = completion.choices[0]?.message?.content || '';
 
       const result = this.parseInterviewStartResponse(responseText);
       this.logger.log(
@@ -232,27 +224,29 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
   "shouldContinue": true 또는 false (충분한 정보가 모였으면 false)
 }`;
 
-      const messages: Anthropic.MessageParam[] = conversationHistory.map(
-        (msg) => ({
+      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        ...conversationHistory.map((msg) => ({
           role: msg.role,
           content: msg.content,
-        }),
-      );
+        })),
+        {
+          role: 'user',
+          content: userMessage,
+        },
+      ];
 
-      messages.push({
-        role: 'user',
-        content: userMessage,
-      });
-
-      const message = await this.client.messages.create({
+      const completion = await this.client.chat.completions.create({
         model: this.model,
-        max_tokens: 1024,
-        system: systemPrompt,
         messages: messages,
+        response_format: { type: 'json_object' },
+        temperature: 0.8,
       });
 
-      const responseText =
-        message.content[0].type === 'text' ? message.content[0].text : '';
+      const responseText = completion.choices[0]?.message?.content || '';
 
       return this.parseChatResponse(responseText);
     } catch (error) {
@@ -281,26 +275,25 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
   "animationTheme": "애니메이션 테마 (happy, nostalgic, exciting, peaceful, melancholy 중 하나)"
 }`;
 
-      const messages: Anthropic.MessageParam[] = conversationHistory.map(
-        (msg) => ({
-          role: msg.role,
+      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+        ...conversationHistory.map((msg) => ({
+          role: msg.role as 'user' | 'assistant',
           content: msg.content,
-        }),
-      );
+        })),
+        {
+          role: 'user',
+          content: storyPrompt,
+        },
+      ];
 
-      messages.push({
-        role: 'user',
-        content: storyPrompt,
-      });
-
-      const message = await this.client.messages.create({
+      const completion = await this.client.chat.completions.create({
         model: this.model,
-        max_tokens: 1024,
         messages: messages,
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
       });
 
-      const responseText =
-        message.content[0].type === 'text' ? message.content[0].text : '';
+      const responseText = completion.choices[0]?.message?.content || '';
 
       return this.parseAnalysisResponse(responseText);
     } catch (error) {
@@ -315,12 +308,7 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
     response: string,
   ): AiInterviewStartResult {
     try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]) as {
+      const parsed = JSON.parse(response) as {
         questions?: string[];
         initialGreeting?: string;
       };
@@ -355,12 +343,7 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
 
   private parseChatResponse(response: string): AiChatResponse {
     try {
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in response');
-      }
-
-      const parsed = JSON.parse(jsonMatch[0]) as {
+      const parsed = JSON.parse(response) as {
         response?: string;
         suggestedNextQuestions?: string[];
         shouldContinue?: boolean;

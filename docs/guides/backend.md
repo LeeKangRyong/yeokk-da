@@ -7,8 +7,9 @@ backend/src/
 ├── auth/            # Google OAuth, JWT
 ├── users/           # User management
 ├── memories/        # Memory CRUD
-├── integrations/    # Instagram, Spotify
-├── ai/              # Claude API
+├── ai/              # OpenAI API (AI interview)
+├── spotify/         # Spotify API (music recommendations)
+├── share/           # Share token and OG tags
 └── shared/
     ├── prisma/      # Database
     └── utils/       # Helpers
@@ -96,32 +97,34 @@ npx prisma migrate deploy
 
 ```typescript
 @Injectable()
-export class AiService {
+export class OpenAiService {
   constructor(
-    private readonly anthropic: AnthropicClient,
+    private readonly client: OpenAI,
   ) {}
 
-  async analyzeMemory(content: string, images: string[]) {
-    const response = await this.anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1024,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'text', text: `Analyze this memory and provide:
+  async analyzeMemory(content: string) {
+    const completion = await this.client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: `Analyze this memory and provide:
             - moodTag (string): emotion (e.g., "행복", "그리움")
             - intensity (number): 0-100
             - themeTag (string): theme (e.g., "여행", "성장")
             - storyLine (string): 3-5 sentence story
-            - animationTheme (string): "happy" | "nostalgic" | "exciting" | "peaceful"
-            
-            Content: ${content}` },
-          ...images.map(url => ({ type: 'image', source: { type: 'url', url } }))
-        ]
-      }],
+            - animationTheme (string): "happy" | "nostalgic" | "exciting" | "peaceful"`
+        },
+        {
+          role: 'user',
+          content: `추억 내용:\n${content}`
+        }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.7,
     });
 
-    return JSON.parse(response.content[0].text);
+    return JSON.parse(completion.choices[0].message.content);
   }
 }
 ```
@@ -211,30 +214,27 @@ async getMemory(id: string) {
 ### Job Queue (Async Processing)
 
 ```typescript
-// Add job for AI analysis
-await this.aiQueue.add('analyze', {
+// Add job for share image generation
+await this.shareQueue.add('generate-share-image', {
   memoryId: '123',
-  priority: 'high',
+  platform: 'instagram-story',
 });
 
 // Process job
-@Processor('ai-analysis')
-export class AiProcessor {
-  @Process('analyze')
+@Processor('share-generation')
+export class ShareProcessor {
+  @Process('generate-share-image')
   async handle(job: Job) {
-    const { memoryId } = job.data;
-    const memory = await this.prisma.memory.findUnique({ where: { id: memoryId } });
-    const analysis = await this.aiService.analyzeMemory(memory.content, memory.images);
-    
-    await this.prisma.memory.update({
+    const { memoryId, platform } = job.data;
+    const memory = await this.prisma.memory.findUnique({
       where: { id: memoryId },
-      data: {
-        moodTag: analysis.moodTag,
-        intensity: analysis.intensity,
-        themeTag: analysis.themeTag,
-        animationTheme: analysis.animationTheme,
-      },
+      include: { images: true }
     });
+
+    // Generate platform-specific share image (e.g., Instagram Story 1080x1920)
+    const shareImage = await this.imageService.generateShareCard(memory, platform);
+
+    await this.storageService.upload(shareImage, `shares/${memoryId}-${platform}.jpg`);
   }
 }
 ```
