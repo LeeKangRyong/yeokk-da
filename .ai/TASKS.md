@@ -46,7 +46,7 @@
   - [ ] GET /api/memories (list with filters)
   - [ ] GET /api/memories/:id (detail)
 - [ ] Claude AI integration
-  - [ ] Image analysis & contextual question generation
+  - [ ] Contextual question generation when image is uploaded
   - [ ] Interactive interview dialog processing
   - [ ] Emotion analysis service
   - [ ] Theme classification
