@@ -20,7 +20,7 @@
 - **Deploy**: Azure App Service
 
 ### External APIs
-- **AI**: Claude 3.5 Sonnet (Anthropic)
+- **AI**: GPT-4o (OpenAI)
 - **Music**: Spotify Web API
 
 ### Infrastructure
@@ -48,7 +48,7 @@ Nest.js Backend (yeokk-da-backend.azurewebsites.net)
 PostgreSQL    Azure Blob         Redis
 (Prisma)      Storage            (BullMQ)
     │
-    └─> External APIs (Claude, Instagram, Spotify)
+    └─> External APIs (OpenAI, Spotify)
 ```
 
 ---
@@ -103,8 +103,8 @@ GET    /api/memories/:id
 POST   /api/memories/upload
 
 // AI Interactive Interview
+POST   /api/ai/start-interview
 POST   /api/ai/chat
-POST   /api/ai/analyze-image
 POST   /api/ai/generate-story
 
 // Spotify (Music Frequency Matching)
@@ -135,7 +135,7 @@ NEXTAUTH_URL=https://yeokk-da.netlify.app
 ```bash
 DATABASE_URL=postgresql://...
 REDIS_URL=redis://...
-ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
 SPOTIFY_CLIENT_ID=...
 SPOTIFY_CLIENT_SECRET=...
 AZURE_STORAGE_CONNECTION_STRING=...
@@ -149,7 +149,7 @@ FRONTEND_URL=https://yeokk-da.netlify.app
 ### Memory Creation (Gamified Interview)
 ```
 1. User uploads images (direct upload)
-2. Claude AI analyzes images and generates contextual questions
+2. OpenAI GPT-4o analyzes text and conducts interactive interview
 3. User engages in dialog-based interview to build narrative
 4. AI extracts { moodTag, intensity, themeTag, storyLine, animationTheme }
 5. Spotify API recommends BGM based on mood/theme
@@ -194,7 +194,7 @@ backend/src/
 ├── auth/            # Authentication
 ├── memories/        # Memory CRUD
 ├── integrations/    # External APIs
-├── ai/              # Claude API
+├── ai/              # OpenAI API
 ├── video/           # FFmpeg processing
 └── shared/          # Prisma, utils
 ```
@@ -217,9 +217,3 @@ backend/src/
 - **Share Pages**: https://yeokk-da.netlify.app/s/:token
 
 ---
-
-## AI API Configuration (FactChat)
-- **Provider**: FactChat (Mindlogic) 통합 API
-- **Base URL**: `https://factchat-cloud.mindlogic.ai/v1/api` 
-- **Model**: `claude-sonnet-4-5-20250929`
-- **Usage**: Anthropic SDK를 사용하되 반드시 `baseURL`을 위 주소로 덮어써야 함.
