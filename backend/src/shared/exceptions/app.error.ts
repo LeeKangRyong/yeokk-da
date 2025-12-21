@@ -45,3 +45,15 @@ export class InternalServerError extends AppError {
     super(500, message, 'INTERNAL_SERVER_ERROR');
   }
 }
+
+export class FileUploadError extends AppError {
+  constructor(message: string) {
+    super(413, message, 'FILE_UPLOAD_ERROR');
+  }
+}
+
+export class UnsupportedMediaTypeError extends AppError {
+  constructor(message = 'Unsupported media type') {
+    super(415, message, 'UNSUPPORTED_MEDIA_TYPE');
+  }
+}

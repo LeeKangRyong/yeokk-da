@@ -3,7 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
+import { SharedModule } from './shared/shared.module';
+import { MemoriesModule } from './memories/memories.module';
 import { LoggerMiddleware } from './shared/middleware/logger.middleware';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -11,7 +14,10 @@ import { LoggerMiddleware } from './shared/middleware/logger.middleware';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    SharedModule,
     HealthModule,
+    MemoriesModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
