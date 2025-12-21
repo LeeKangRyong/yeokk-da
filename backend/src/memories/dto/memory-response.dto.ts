@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 export class MemoryImageDto {
   id: string;
   url: string;
@@ -11,7 +13,7 @@ export class MemorySourceDto {
   id: string;
   platform: string;
   externalId: string | null;
-  rawData: Record<string, any>;
+  rawData: Prisma.JsonValue;
   createdAt: Date;
 }
 

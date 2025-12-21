@@ -23,5 +23,10 @@ export class GenerateStoryResponseDto {
   intensity: number;
   themeTag: string;
   storyLine: string;
-  animationTheme: 'happy' | 'nostalgic' | 'exciting' | 'peaceful' | 'melancholy';
+  animationTheme:
+    | 'happy'
+    | 'nostalgic'
+    | 'exciting'
+    | 'peaceful'
+    | 'melancholy';
 }

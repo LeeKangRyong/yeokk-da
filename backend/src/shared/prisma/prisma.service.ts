@@ -40,6 +40,7 @@ export class PrismaService
       throw new Error('Cannot clean database in production');
     }
     const models = Reflect.ownKeys(this).filter((key) => key[0] !== '_');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return Promise.all(models.map((modelKey) => this[modelKey].deleteMany()));
   }
 }

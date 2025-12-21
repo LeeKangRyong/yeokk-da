@@ -109,14 +109,25 @@ export class AnthropicService {
         throw new Error('No JSON found in response');
       }
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]) as {
+        moodTag?: string;
+        intensity?: number;
+        themeTag?: string;
+        storyLine?: string;
+        animationTheme?: string;
+      };
 
       return {
         moodTag: parsed.moodTag || '평온',
-        intensity: Math.min(100, Math.max(0, parsed.intensity || 50)),
+        intensity: Math.min(
+          100,
+          Math.max(0, parsed.intensity !== undefined ? parsed.intensity : 50),
+        ),
         themeTag: parsed.themeTag || '일상',
         storyLine: parsed.storyLine || '소중한 추억입니다.',
-        animationTheme: this.validateAnimationTheme(parsed.animationTheme),
+        animationTheme: this.validateAnimationTheme(
+          parsed.animationTheme || '',
+        ),
       };
     } catch (error) {
       this.logger.error('Failed to parse AI response', error);
@@ -134,7 +145,9 @@ export class AnthropicService {
       'peaceful',
       'melancholy',
     ];
-    return validThemes.includes(theme as any) ? (theme as any) : 'peaceful';
+    return validThemes.includes(theme as AiAnalysisResult['animationTheme'])
+      ? (theme as AiAnalysisResult['animationTheme'])
+      : 'peaceful';
   }
 
   private getDefaultAnalysis(): AiAnalysisResult {
@@ -185,12 +198,16 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
         message.content[0].type === 'text' ? message.content[0].text : '';
 
       const result = this.parseInterviewStartResponse(responseText);
-      this.logger.log(`Generated ${result.questions.length} interview questions`);
+      this.logger.log(
+        `Generated ${result.questions.length} interview questions`,
+      );
 
       return result;
     } catch (error) {
       this.logger.error('Failed to start interview', error);
-      throw new InternalServerError('Interview start failed. Please try again.');
+      throw new InternalServerError(
+        'Interview start failed. Please try again.',
+      );
     }
   }
 
@@ -240,7 +257,9 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
       return this.parseChatResponse(responseText);
     } catch (error) {
       this.logger.error('Failed to process chat', error);
-      throw new InternalServerError('Chat processing failed. Please try again.');
+      throw new InternalServerError(
+        'Chat processing failed. Please try again.',
+      );
     }
   }
 
@@ -286,7 +305,9 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
       return this.parseAnalysisResponse(responseText);
     } catch (error) {
       this.logger.error('Failed to generate story', error);
-      throw new InternalServerError('Story generation failed. Please try again.');
+      throw new InternalServerError(
+        'Story generation failed. Please try again.',
+      );
     }
   }
 
@@ -299,7 +320,10 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
         throw new Error('No JSON found in response');
       }
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]) as {
+        questions?: string[];
+        initialGreeting?: string;
+      };
 
       return {
         questions: parsed.questions || [
@@ -336,7 +360,11 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
         throw new Error('No JSON found in response');
       }
 
-      const parsed = JSON.parse(jsonMatch[0]);
+      const parsed = JSON.parse(jsonMatch[0]) as {
+        response?: string;
+        suggestedNextQuestions?: string[];
+        shouldContinue?: boolean;
+      };
 
       return {
         response: parsed.response || '더 자세히 말씀해주시겠어요?',

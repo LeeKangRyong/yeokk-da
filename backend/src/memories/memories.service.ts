@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AzureStorageService } from '../shared/services/azure-storage.service';
 import { ImageProcessingService } from '../shared/services/image-processing.service';
@@ -67,7 +68,7 @@ export class MemoriesService {
 
     if (files.length > 0) {
       const uploadedImages = await this.uploadImages(memory.id, files);
-      await this.prisma.memory.update({
+      const updatedMemory = await this.prisma.memory.update({
         where: { id: memory.id },
         data: {
           images: {
@@ -76,9 +77,14 @@ export class MemoriesService {
             },
           },
         },
+        include: {
+          images: { orderBy: { order: 'asc' } },
+          sources: true,
+        },
       });
 
-      memory.images = uploadedImages as any;
+      this.logger.log(`Memory created: ${updatedMemory.id}`);
+      return this.toResponseDto(updatedMemory);
     }
 
     this.logger.log(`Memory created: ${memory.id}`);
@@ -108,6 +114,7 @@ export class MemoriesService {
         where,
         include: {
           images: { orderBy: { order: 'asc' } },
+          sources: true,
         },
         orderBy: { [sortBy]: sortOrder },
         skip: (page - 1) * limit,
@@ -157,8 +164,8 @@ export class MemoriesService {
       GetMemoriesQueryDto,
       'moodTag' | 'themeTag' | 'startDate' | 'endDate' | 'search'
     >,
-  ) {
-    const where: any = { userId };
+  ): Prisma.MemoryWhereInput {
+    const where: Prisma.MemoryWhereInput = { userId };
 
     if (filters.moodTag) {
       where.moodTag = filters.moodTag;
@@ -220,7 +227,11 @@ export class MemoriesService {
     return Promise.all(uploadPromises);
   }
 
-  private toResponseDto(memory: any): MemoryResponseDto {
+  private toResponseDto(
+    memory: Prisma.MemoryGetPayload<{
+      include: { images: true; sources: true };
+    }>,
+  ): MemoryResponseDto {
     return {
       id: memory.id,
       userId: memory.userId,

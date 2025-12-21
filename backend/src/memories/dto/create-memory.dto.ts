@@ -20,7 +20,9 @@ export class CreateMemoryDto {
 
   @IsISO8601()
   @IsOptional()
-  @Transform(({ value }) => value || new Date().toISOString())
+  @Transform(
+    ({ value }: { value?: string }) => value || new Date().toISOString(),
+  )
   memoryDate?: string;
 
   @IsString()
