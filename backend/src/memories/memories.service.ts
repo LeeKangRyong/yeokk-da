@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AzureStorageService } from '../shared/services/azure-storage.service';
 import { ImageProcessingService } from '../shared/services/image-processing.service';
-import { AnthropicService } from '../shared/services/anthropic.service';
+import { OpenAiService } from '../shared/services/openai.service';
 import {
   NotFoundError,
   ForbiddenError,
@@ -24,7 +24,7 @@ export class MemoriesService {
     private prisma: PrismaService,
     private azureStorage: AzureStorageService,
     private imageProcessing: ImageProcessingService,
-    private anthropic: AnthropicService,
+    private openai: OpenAiService,
   ) {}
 
   async create(
@@ -39,7 +39,7 @@ export class MemoriesService {
     }
 
     const content = dto.content || dto.title;
-    const aiAnalysis = await this.anthropic.analyzeMemory(content);
+    const aiAnalysis = await this.openai.analyzeMemory(content);
 
     const memory = await this.prisma.memory.create({
       data: {

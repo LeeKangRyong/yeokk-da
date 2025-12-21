@@ -4,13 +4,13 @@ import { MemoriesService } from './memories.service';
 import { PrismaService } from '../shared/prisma/prisma.service';
 import { AzureStorageService } from '../shared/services/azure-storage.service';
 import { ImageProcessingService } from '../shared/services/image-processing.service';
-import { AnthropicService } from '../shared/services/anthropic.service';
+import { OpenAiService } from '../shared/services/openai.service';
 import { NotFoundError, ForbiddenError } from '../shared/exceptions/app.error';
 
 describe('MemoriesService', () => {
   let service: MemoriesService;
   let prismaService: PrismaService;
-  let anthropicService: AnthropicService;
+  let openaiService: OpenAiService;
 
   const mockPrismaService = {
     memory: {
@@ -30,7 +30,7 @@ describe('MemoriesService', () => {
     processImage: jest.fn(),
   };
 
-  const mockAnthropicService = {
+  const mockOpenAiService = {
     analyzeMemory: jest.fn(),
   };
 
@@ -44,13 +44,13 @@ describe('MemoriesService', () => {
           provide: ImageProcessingService,
           useValue: mockImageProcessingService,
         },
-        { provide: AnthropicService, useValue: mockAnthropicService },
+        { provide: OpenAiService, useValue: mockOpenAiService },
       ],
     }).compile();
 
     service = module.get<MemoriesService>(MemoriesService);
     prismaService = module.get<PrismaService>(PrismaService);
-    anthropicService = module.get<AnthropicService>(AnthropicService);
+    openaiService = module.get<OpenAiService>(OpenAiService);
   });
 
   afterEach(() => {
@@ -96,12 +96,12 @@ describe('MemoriesService', () => {
         sources: [{ platform: 'manual', rawData: {} }],
       };
 
-      mockAnthropicService.analyzeMemory.mockResolvedValue(mockAiAnalysis);
+      mockOpenAiService.analyzeMemory.mockResolvedValue(mockAiAnalysis);
       mockPrismaService.memory.create.mockResolvedValue(mockMemory);
 
       const result = await service.create(userId, dto);
 
-      expect(anthropicService.analyzeMemory).toHaveBeenCalledWith(dto.content);
+      expect(openaiService.analyzeMemory).toHaveBeenCalledWith(dto.content);
       expect(prismaService.memory.create).toHaveBeenCalled();
       expect(result.title).toBe(dto.title);
       expect(result.moodTag).toBe(mockAiAnalysis.moodTag);
