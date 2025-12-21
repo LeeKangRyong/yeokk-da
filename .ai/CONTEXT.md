@@ -21,7 +21,6 @@
 
 ### External APIs
 - **AI**: Claude 3.5 Sonnet (Anthropic)
-- **Social**: Instagram Graph API, Facebook Graph API
 - **Music**: Spotify Web API
 
 ### Infrastructure
@@ -97,19 +96,27 @@ model Integration {
 POST   /api/auth/google
 GET    /api/auth/me
 
-// Integrations
-POST   /api/integrations/:platform/connect
-POST   /api/integrations/:platform/import
-
 // Memories
 GET    /api/memories
 POST   /api/memories
 GET    /api/memories/:id
 POST   /api/memories/upload
 
+// AI Interactive Interview
+POST   /api/ai/chat
+POST   /api/ai/analyze-image
+POST   /api/ai/generate-story
+
+// Spotify (Music Frequency Matching)
+POST   /api/spotify/connect
+GET    /api/spotify/recommendations
+GET    /api/spotify/search
+POST   /api/memories/:id/bgm
+
 // Share
 POST   /api/memories/:id/share
 GET    /s/:shareToken
+POST   /api/memories/:id/export-story
 ```
 
 ---
@@ -129,8 +136,8 @@ NEXTAUTH_URL=https://yeokk-da.netlify.app
 DATABASE_URL=postgresql://...
 REDIS_URL=redis://...
 ANTHROPIC_API_KEY=sk-ant-...
-INSTAGRAM_CLIENT_ID=...
 SPOTIFY_CLIENT_ID=...
+SPOTIFY_CLIENT_SECRET=...
 AZURE_STORAGE_CONNECTION_STRING=...
 FRONTEND_URL=https://yeokk-da.netlify.app
 ```
@@ -139,30 +146,35 @@ FRONTEND_URL=https://yeokk-da.netlify.app
 
 ## Key Flows
 
-### Memory Creation
+### Memory Creation (Gamified Interview)
 ```
-1. User uploads text + images
-2. Backend calls Claude API for analysis
-3. AI returns { moodTag, intensity, themeTag, storyLine }
-4. Save to DB
-5. Generate interactive page with animations
-6. Return memory ID with layout config
-```
-
-### Integration Import
-```
-1. OAuth flow (Instagram/Spotify/Notion)
-2. Fetch user data from external API
-3. Normalize to UnifiedPost format
-4. Store in MemorySource
-5. Trigger AI analysis
-6. Create Memory with animation theme
+1. User uploads images (direct upload)
+2. Claude AI analyzes images and generates contextual questions
+3. User engages in dialog-based interview to build narrative
+4. AI extracts { moodTag, intensity, themeTag, storyLine, animationTheme }
+5. Spotify API recommends BGM based on mood/theme
+6. User explores and selects BGM via radio dial UI
+7. Save to DB with cinematic layout config
+8. Generate scroll-driven interactive page
 ```
 
-### Video Generation
+### Music Frequency Matching (Spotify)
 ```
-비디오 생성 기능은 제거되었습니다.
-대신 스크롤 기반 인터랙티브 페이지로 대체됩니다.
+1. AI analysis provides mood/theme metadata
+2. Backend calls Spotify API for track recommendations
+3. Frontend renders radio dial UI with preview support
+4. User fine-tunes selection through dial interaction
+5. Final BGM is synced with animation timeline
+6. Track metadata saved to Memory record
+```
+
+### Cinematic Page & Share
+```
+1. Memory rendered with 5 layout types: Magazine, Cinema, Parallax, Collage, Music Story
+2. Scroll-driven Framer Motion animations applied
+3. User generates share link with OG tags
+4. Instagram Story export creates optimized image/video card
+5. Non-authenticated users can view via /s/:token
 ```
 
 ---

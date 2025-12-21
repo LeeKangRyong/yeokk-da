@@ -38,7 +38,7 @@
 
 ---
 
-### 🚧 Day 2: 기반 구축, 직접 입력 기능, Instagram 연동 (IN PROGRESS)
+### 🚧 Day 2: Claude AI 분석 연동, 게임형 인터뷰 UI, Spotify 추천 로직 (IN PROGRESS)
 
 #### 기반 구축
 - [ ] Memory CRUD API
@@ -46,97 +46,120 @@
   - [ ] GET /api/memories (list with filters)
   - [ ] GET /api/memories/:id (detail)
 - [ ] Claude AI integration
+  - [ ] Image analysis & contextual question generation
+  - [ ] Interactive interview dialog processing
   - [ ] Emotion analysis service
   - [ ] Theme classification
   - [ ] Story generation
   - [ ] Animation theme 생성
 - [ ] Azure Blob Storage
-  - [ ] Image upload
+  - [ ] Image upload (direct upload)
   - [ ] Image optimization (Sharp)
 
-#### 직접 입력 기능
-- [ ] Frontend: Memory creation page
-  - [ ] Text input form (validation)
+#### 게임화된 AI 인터뷰 UI
+- [ ] Frontend: AI Interview chat interface
+  - [ ] Chat bubble UI with AI questions
+  - [ ] User response input
+  - [ ] Real-time narrative building feedback
+  - [ ] Progressive disclosure of questions
+- [ ] Frontend: Memory upload flow
   - [ ] Image upload (drag & drop)
-  - [ ] Real-time AI feedback UI
-  - [ ] 이미지 최적화 처리
+  - [ ] Image preview with thumbnails
+  - [ ] Upload progress indicator
 - [ ] Frontend: Memory list page
   - [ ] Timeline view
   - [ ] Filter by mood/theme
   - [ ] Card grid layout
   - [ ] Entry animations (Framer Motion)
-- [ ] Basic Framer Motion animations
-  - [ ] Scroll-triggered reveals
-  - [ ] Hover effects
-  - [ ] Page transitions
 
-#### Instagram 연동
-- [ ] Backend: Instagram integration
-  - [ ] Instagram OAuth flow
-  - [ ] Import Instagram posts API
-  - [ ] Normalize Instagram data
-- [ ] Frontend: Integration UI
-  - [ ] Integration settings page
-  - [ ] Instagram connect button
-  - [ ] Import progress UI
+#### Spotify 추천 로직 구축
+- [ ] Backend: Spotify integration
+  - [ ] Spotify OAuth flow
+  - [ ] Track recommendation API (mood/theme based)
+  - [ ] Search API integration
+  - [ ] Preview URL fetching
+- [ ] Backend: Music matching service
+  - [ ] Mood-to-genre mapping logic
+  - [ ] Theme-based track filtering
+  - [ ] BGM assignment to Memory
 
 #### Testing
-- [ ] Backend unit tests (memories.service)
-- [ ] Frontend component tests (MemoryCard)
+- [ ] Backend unit tests (memories.service, ai.service)
+- [ ] Frontend component tests (AIChat, MemoryCard)
 
 ---
 
-## 🔜 Phase 2: 음악 & 애니메이션 고도화 (Days 3-4)
+## 🔜 Phase 2: 시네마틱 엔진 & 공유 (Days 3-4)
 
-### Day 3: Spotify Integration & Basic Animations
-- [ ] Spotify OAuth & data import
-- [ ] Music-emotion matching
-- [ ] Music Story layout
-- [ ] Basic scroll animations
-- [ ] Hover effects
-- [ ] Page transitions
+### Day 3: Spotify 라디오 다이얼 UI, 시네마틱 레이아웃 뼈대
+- [ ] **Spotify 라디오 다이얼 UI**
+  - [ ] Radio dial component (SVG/Canvas)
+  - [ ] Frequency tuning interaction (drag/swipe)
+  - [ ] Track preview playback
+  - [ ] Real-time recommendation updates
+  - [ ] BGM selection confirmation
 
-### Day 4: Advanced Animations
-- [ ] **Scroll-driven Storytelling**
-  - [ ] Parallax effects (다층 깊이)
-  - [ ] Scroll velocity tracking
+- [ ] **시네마틱 레이아웃 5종 구현 (뼈대)**
+  - [ ] **Magazine**: 잡지 편집 레이아웃 (그리드 + 타이포그래피)
+  - [ ] **Cinema**: 영화 예고편 풀스크린 (16:9 비율, 자막 스타일)
+  - [ ] **Parallax**: 다층 깊이 스크롤 효과
+  - [ ] **Collage**: 자유로운 배치, 회전, 중첩
+  - [ ] **Music Story**: 음악 플레이어 + 가사 스타일
+
+- [ ] **Basic Scroll Animations**
   - [ ] useScroll + useTransform hooks
-  - [ ] IntersectionObserver reveals
-  
+  - [ ] Scroll-triggered reveals
+  - [ ] IntersectionObserver integration
+  - [ ] Page transitions
+
+### Day 4: SNS 공유 기능, 테마 배경 완성
+- [ ] **SNS 공유 기능**
+  - [ ] Share link generation (/s/:token)
+  - [ ] Dynamic OG Tag metadata
+  - [ ] Instagram Story image/video export
+  - [ ] html-to-image or Puppeteer screenshot
+  - [ ] Kakao/Twitter share button integration
+
+- [ ] **AI Theme-based Dynamic Backgrounds**
+  - [ ] **Happy**: 밝은 파티클, 따뜻한 그라데이션
+  - [ ] **Nostalgic**: 부드러운 안개, 차분한 색상
+  - [ ] **Exciting**: 반짝이는 빛, 생동감 있는 색상
+  - [ ] **Peaceful**: 부드러운 물결, 평온한 그라데이션
+  - [ ] **Melancholy**: 빗방울 효과, 쿨톤 색상
+
 - [ ] **Shared Layout Animations**
   - [ ] Card → Detail 부드러운 전환
   - [ ] layoutId 기반 morphing
   - [ ] AnimatePresence 구현
-  - [ ] List reordering animations
-  
-- [ ] **AI Theme-based Dynamic Backgrounds**
-  - [ ] Particle systems (행복, 설렘)
-  - [ ] Dynamic gradients (그리움, 평온)
-  - [ ] Canvas animations (여행, 성장)
-  - [ ] 테마별 색상 팔레트
-  
+
 - [ ] **Micro-interactions**
   - [ ] 3D tilt on hover
   - [ ] Click feedback ripple
   - [ ] Loading skeletons
-  - [ ] Gesture controls
 
 ---
 
-## 🔜 Phase 3: 공유 & 최적화 (Day 5)
+## 🔜 Phase 3: 최적화 & 론칭 (Day 5)
 
-### 공유 기능
-- [ ] 고유 URL 생성
-- [ ] 공개/비공개 설정
-- [ ] SNS 메타 태그
+### 고유 URL 공유 기능 최종 점검
+- [ ] Share token security validation
+- [ ] OG tag dynamic rendering test
+- [ ] Instagram Story export quality check
+- [ ] Multi-device share link compatibility
 
-### 성능 & 애니메이션 최적화
+### 인트로 애니메이션
+- [ ] Landing page hero animation
+- [ ] Service concept explainer (Lottie or Framer Motion)
+- [ ] CTA button micro-interactions
+
+### 성능 최적화
 - [ ] 애니메이션 성능 최적화
   - [ ] requestAnimationFrame 최적화
-  - [ ] GPU 가속 활용
-  - [ ] Reduced motion 지원
-- [ ] 이미지 lazy loading
-- [ ] Code splitting
+  - [ ] GPU 가속 활용 (transform, opacity)
+  - [ ] Reduced motion 지원 (prefers-reduced-motion)
+- [ ] 이미지 lazy loading & placeholder
+- [ ] Code splitting & dynamic imports
+- [ ] Lighthouse audit (LCP < 2.5s, FPS > 60)
 
 ---
 

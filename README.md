@@ -1,15 +1,14 @@
 # 엮다 (Yeokk-da)
 
-> 흩어진 디지털 발자취를 하나의 이야기로 엮어내는 AI 추억 플랫폼
+> 파편화된 사진과 음악을 AI와의 대화를 통해 한 편의 영화 같은 서사로 엮어내는 인터랙티브 추억 복원 플랫폼
 
 ## 요약
 
-SNS, 음악 스트리밍, 개인 콘텐츠를 AI가 분석하여:
-- **스크롤 기반 인터랙티브 스토리텔링**
-- **AI 테마별 동적 배경 애니메이션**
-- **추억 카드의 마법 같은 전환 효과** (Shared Layout Animations)
-- **자동 정리 & 분류**
-- **간편한 공유**
+사용자가 던진 추억의 조각(이미지/텍스트)을 AI가 게임처럼 인터뷰하여:
+- **게임화된 인터뷰**: 추억을 복원하는 듯한 다이얼로그 기반 입력
+- **음악 주파수 맞추기**: 감성 분석 기반 Spotify BGM 큐레이션 및 라디오 다이얼식 탐색
+- **시네마틱 스토리텔링**: 스크롤에 반응하는 한 편의 영화 같은 연출
+- **멀티 채널 공유**: 인스타그램 스토리, 카카오톡 등 SNS 최적화 공유 기능
 
 ## 🎯 개발 목적
 본 프로젝트는 AI Agent 기반의 차세대 개발 워크플로우를 탐색하고 실현하기 위해 개발하였습니다.
@@ -51,10 +50,11 @@ npm run start:dev
 
 ## 🛠 Tech Stack
 
-**Frontend**: Next.js 15, TypeScript, Tailwind, Framer Motion  
-**Backend**: Nest.js, Prisma, PostgreSQL, Redis  
-**AI**: Claude 3.5 Sonnet  
-**Infra**: Netlify (Frontend), Azure (Backend, DB, Storage)  
+**Frontend**: Next.js 15, TypeScript, Tailwind, Framer Motion
+**Backend**: Nest.js, Prisma, PostgreSQL, Redis
+**AI**: Claude 3.5 Sonnet (Anthropic)
+**External APIs**: Spotify Web API
+**Infra**: Netlify (Frontend), Azure (Backend, DB, Storage)
 **CI/CD**: GitHub Actions
 
 ## 📝 Development

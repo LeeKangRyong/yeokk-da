@@ -56,3 +56,4 @@ logs/
 .claude/
 .venv/
 infra_test.py
+insta_test.js
