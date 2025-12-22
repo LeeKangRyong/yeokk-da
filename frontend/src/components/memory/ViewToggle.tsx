@@ -8,7 +8,7 @@ export function ViewToggle() {
   const { view, setView } = useMemoryViewStore();
 
   return (
-    <div className="relative inline-flex rounded-xl bg-white p-1.5 shadow-neo-outset w-64"> 
+    <div className="relative inline-flex rounded-xl bg-white p-1.5 w-64"> 
       {/* Sliding background indicator */}
       <motion.div
         className="absolute inset-y-1.5 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 shadow-3d-sm"

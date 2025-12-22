@@ -4,10 +4,11 @@ import { cn } from '@/lib/utils/cn';
 interface DatePickerProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  labelColor?: string;
 }
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
-  ({ className, label, error, id, ...props }, ref) => {
+  ({ className, label, error, id, labelColor="text-gray-700", ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
 
     return (
@@ -15,7 +16,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-1 block text-sm font-medium text-gray-700"
+            className={`mb-1 block text-sm font-medium ${labelColor}`}
           >
             {label}
             {props.required && <span className="ml-1 text-red-500">*</span>}

@@ -179,7 +179,6 @@ export function MemoryFilters() {
 
           {/* Sort Order */}
           <Button
-            variant="outline"
             onClick={() =>
               setFilter('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')
             }

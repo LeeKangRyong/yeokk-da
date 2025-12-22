@@ -22,7 +22,7 @@ export default function MemoriesPage() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-4xl font-bold mb-2">나의 추억</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             {data?.meta.total || 0}개의 추억이 저장되어 있습니다
           </p>
         </div>

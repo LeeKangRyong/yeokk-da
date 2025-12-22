@@ -73,7 +73,7 @@ export function ImageUploader({
 
   return (
     <div className="w-full">
-      <label className="mb-2 block text-sm font-medium text-gray-700">
+      <label className="mb-2 block text-sm font-medium text-gray-400">
         이미지 업로드
         <span className="ml-1 text-red-500">*</span>
         <span className="ml-2 text-xs text-gray-500">

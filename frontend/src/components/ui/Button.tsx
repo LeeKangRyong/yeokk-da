@@ -29,7 +29,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary: 'bg-gradient-to-br from-primary-500 to-primary-700 text-white shadow-3d-sm hover:shadow-glow',
-      secondary: 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-900 shadow-neo-outset hover:shadow-3d-sm',
+      secondary: 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-900 hover:shadow-3d-sm',
       outline: 'border-2 border-primary-600 text-primary-600 shadow-neo-outset hover:bg-primary-50 hover:shadow-3d-sm',
       ghost: 'text-primary-600 hover:bg-primary-50',
     };

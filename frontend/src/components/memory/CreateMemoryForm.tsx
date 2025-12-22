@@ -227,6 +227,7 @@ export function CreateMemoryForm() {
             value={memoryDate}
             onChange={(e) => setMemoryDate(e.target.value)}
             max={formatDateInput(new Date())}
+            labelColor="text-gray-400"
           />
         </motion.div>
 
