@@ -40,6 +40,12 @@ export interface CreateMemoryData {
   memoryDate?: string;
   location?: string;
   images: File[];
+  // Optional AI analysis fields (from interview)
+  moodTag?: string;
+  intensity?: number;
+  themeTag?: string;
+  storyLine?: string;
+  animationTheme?: string;
 }
 
 export interface MemoryFilters {

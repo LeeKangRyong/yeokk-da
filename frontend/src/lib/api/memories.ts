@@ -32,6 +32,13 @@ export const memoriesApi = {
     if (data.memoryDate) formData.append('memoryDate', data.memoryDate);
     if (data.location) formData.append('location', data.location);
 
+    // Append optional AI analysis fields (from interview)
+    if (data.moodTag) formData.append('moodTag', data.moodTag);
+    if (data.intensity !== undefined) formData.append('intensity', data.intensity.toString());
+    if (data.themeTag) formData.append('themeTag', data.themeTag);
+    if (data.storyLine) formData.append('storyLine', data.storyLine);
+    if (data.animationTheme) formData.append('animationTheme', data.animationTheme);
+
     // Append all image files
     data.images.forEach((file) => {
       formData.append('images', file);

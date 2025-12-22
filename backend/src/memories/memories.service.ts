@@ -39,7 +39,30 @@ export class MemoriesService {
     }
 
     const content = dto.content || dto.title;
-    const aiAnalysis = await this.openai.analyzeMemory(content);
+
+    // Use provided AI analysis OR generate new one
+    let aiAnalysis;
+    if (
+      dto.moodTag &&
+      dto.intensity !== undefined &&
+      dto.themeTag &&
+      dto.storyLine &&
+      dto.animationTheme
+    ) {
+      // Use analysis from frontend (interview flow)
+      aiAnalysis = {
+        moodTag: dto.moodTag,
+        intensity: dto.intensity,
+        themeTag: dto.themeTag,
+        storyLine: dto.storyLine,
+        animationTheme: dto.animationTheme,
+      };
+      this.logger.log('Using AI analysis from interview');
+    } else {
+      // Generate new analysis (fallback for future quick create)
+      aiAnalysis = await this.openai.analyzeMemory(content);
+      this.logger.log('Generated new AI analysis');
+    }
 
     const memory = await this.prisma.memory.create({
       data: {
