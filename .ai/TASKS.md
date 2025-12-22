@@ -11,30 +11,30 @@
 ### 📅 Day 1: 환경 세팅 & 기초 웹 설정
 
 #### 환경 세팅
-- [ ] Azure resources 설정
-  - [ ] PostgreSQL database
-  - [ ] Redis cache
-  - [ ] Blob Storage
-  - [ ] Key Vault
-- [ ] CI/CD pipeline 구축
-  - [ ] GitHub Actions 설정
-  - [ ] Netlify 연동
-  - [ ] Azure 배포 설정
+- [x] Azure resources 설정
+  - [x] PostgreSQL database
+  - [x] Redis cache
+  - [x] Blob Storage
+  - [x] Key Vault
+- [x] CI/CD pipeline 구축
+  - [x] GitHub Actions 설정
+  - [x] Netlify 연동
+  - [x] Azure 배포 설정
 
 #### JIRA 티켓 작성
-- [ ] Phase 1-4 전체 티켓 구조화
-- [ ] 세부 작업 티켓 생성
-- [ ] 우선순위 설정
+- [x] Phase 1-4 전체 티켓 구조화
+- [x] 세부 작업 티켓 생성
+- [x] 우선순위 설정
 
 #### 기초 웹 설정
 - [x] Frontend 기본 레이아웃 ✅ (2025-12-20)
   - [x] Header/Navigation (YD-16)
   - [x] Footer (YD-17)
   - [x] 기본 라우팅 구조 (YD-18)
-- [ ] Backend 기본 구조
-  - [ ] 헬스 체크 엔드포인트
-  - [ ] 에러 핸들링 미들웨어
-  - [ ] 로깅 설정
+- [x] Backend 기본 구조
+  - [x] 헬스 체크 엔드포인트
+  - [x] 에러 핸들링 미들웨어
+  - [x] 로깅 설정
 
 ---
 

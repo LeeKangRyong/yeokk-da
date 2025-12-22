@@ -164,28 +164,28 @@ Backend: api.yeokk-da.com → yeokk-da-backend.azurewebsites.net
 ### Initial Setup
 - [x] Create GitHub repository
 - [x] Setup Netlify site
-- [ ] Create Azure Resource Group
-- [ ] Setup Azure App Service (Backend)
-- [ ] Create PostgreSQL database
-- [ ] Create Redis cache
-- [ ] Create Blob Storage
-- [ ] Create Key Vault
+- [x] Create Azure Resource Group
+- [x] Setup Azure App Service (Backend)
+- [x] Create PostgreSQL database
+- [x] Create Redis cache
+- [x] Create Blob Storage
+- [x] Create Key Vault
 
 ### OAuth Apps
 - [ ] Google OAuth app
 - [ ] Spotify app
 
 ### Secrets & Keys
-- [ ] Generate JWT secret
-- [ ] Generate NextAuth secret
-- [ ] Get Anthropic API key
-- [ ] Configure Azure connection strings
+- [x] Generate JWT secret
+- [x] Generate NextAuth secret
+- [x] Get OpenAI API key
+- [x] Configure Azure connection strings
 
 ### CI/CD
-- [ ] Setup GitHub Actions
-- [ ] Add Netlify deploy token
-- [ ] Add Azure publish profile
-- [ ] Test deployment pipeline
+- [x] Setup GitHub Actions
+- [x] Add Netlify deploy token
+- [x] Add Azure publish profile
+- [x] Test deployment pipeline
 
 ---
 
