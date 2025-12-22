@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMemoryFilterStore } from '@/lib/stores/useMemoryFilterStore';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -35,15 +36,19 @@ export function MemoryFilters() {
   ].filter(Boolean).length;
 
   return (
-    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
-      {/* TODO YD-40: Add slide-down animation when filter appears */}
-      {/* TODO YD-40: Add badge pulse when filters active */}
-
+    <motion.div
+      className="mb-6 rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-md p-4 shadow-3d-sm"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Mobile: Filter Toggle */}
       <div className="mb-4 flex items-center justify-between md:hidden">
-        <button
+        <motion.button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-2 text-sm font-medium text-gray-700"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <svg
             className="h-5 w-5"
@@ -60,18 +65,27 @@ export function MemoryFilters() {
             />
           </svg>
           필터
-          {activeFilterCount > 0 && (
-            <Badge variant="primary">{activeFilterCount}</Badge>
-          )}
-          <svg
-            className={cn(
-              'h-4 w-4 transition-transform',
-              isExpanded && 'rotate-180'
+          <AnimatePresence>
+            {activeFilterCount > 0 && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+              >
+                <Badge variant="primary" className="animate-pulse-glow shadow-glow">
+                  {activeFilterCount}
+                </Badge>
+              </motion.div>
             )}
+          </AnimatePresence>
+          <motion.svg
+            className="h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
           >
             <path
               strokeLinecap="round"
@@ -79,8 +93,8 @@ export function MemoryFilters() {
               strokeWidth={2}
               d="M19 9l-7 7-7-7"
             />
-          </svg>
-        </button>
+          </motion.svg>
+        </motion.button>
         {activeFilterCount > 0 && (
           <Button variant="ghost" size="sm" onClick={resetFilters}>
             초기화
@@ -88,13 +102,15 @@ export function MemoryFilters() {
         )}
       </div>
 
-      {/* Filter Controls */}
-      <div
-        className={cn(
-          'space-y-4',
-          'md:block',
-          !isExpanded && 'hidden'
-        )}
+      {/* Filter Controls with Smooth Height Animation */}
+      <motion.div
+        className={cn('space-y-4 overflow-hidden', 'md:block')}
+        animate={{
+          height: isExpanded || typeof window === 'undefined' || window.innerWidth >= 768 ? 'auto' : 0,
+          opacity: isExpanded || typeof window === 'undefined' || window.innerWidth >= 768 ? 1 : 0,
+        }}
+        initial={false}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
         {/* Search */}
         <div className="w-full">
@@ -218,8 +234,7 @@ export function MemoryFilters() {
             초기화
           </Button>
         </div>
-      </div>
-      {/* TODO YD-40: Add drawer slide animation on mobile */}
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
