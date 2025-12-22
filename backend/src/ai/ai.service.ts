@@ -21,9 +21,7 @@ export class AiService {
   ): Promise<StartInterviewResponseDto> {
     this.logger.log('Starting AI interview');
 
-    const result = await this.openaiService.startInterview(
-      dto.initialContext,
-    );
+    const result = await this.openaiService.startInterview(dto.initialContext);
 
     return {
       questions: result.questions,
