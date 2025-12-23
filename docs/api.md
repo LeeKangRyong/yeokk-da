@@ -10,7 +10,7 @@
 - **시네마틱 레이아웃**: Framer Motion 기반 5종 애니메이션 테마
 - **멀티 채널 공유**: 인스타그램 스토리, 링크 공유 최적화
 
-- **Version:** 0.0.1
+- **Version:** 0.0.3
 - **Base URL (개발):** `http://localhost:3000`
 - **Base URL (운영):** `https://yeokk-da-backend.azurewebsites.net`
 - **Framework:** Nest.js 10.3
@@ -219,13 +219,190 @@ Host: localhost:3000
 
 ---
 
+## Auth API (Google OAuth)
+
+Google OAuth 2.0 기반 인증 API입니다.
+
+### POST /api/auth/google
+
+Google OAuth 토큰으로 로그인 또는 회원가입을 수행합니다.
+
+**인증 필요**: No
+
+**요청 (JSON)**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| idToken | string | Yes | Google에서 발급받은 ID 토큰 |
+
+**요청 예시**
+```bash
+curl -X POST http://localhost:3000/api/auth/google \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }'
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...",
+    "expiresIn": 3600,
+    "user": {
+      "id": "usr_123",
+      "email": "user@example.com",
+      "name": "홍길동",
+      "profileImage": "https://lh3.googleusercontent.com/..."
+    }
+  }
+}
+```
+
+**에러 응답**
+- `400 Bad Request` - 유효하지 않은 ID 토큰
+- `401 Unauthorized` - 토큰 검증 실패
+- `500 Internal Server Error` - 서버 오류
+
+---
+
+### POST /api/auth/refresh
+
+리프레시 토큰으로 새로운 액세스 토큰을 발급받습니다.
+
+**인증 필요**: No
+
+**요청 (JSON)**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| refreshToken | string | Yes | 리프레시 토큰 |
+
+**요청 예시**
+```bash
+curl -X POST http://localhost:3000/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."
+  }'
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": 3600
+  }
+}
+```
+
+**에러 응답**
+- `400 Bad Request` - 유효하지 않은 리프레시 토큰
+- `401 Unauthorized` - 토큰 만료 또는 무효화됨
+- `500 Internal Server Error` - 서버 오류
+
+---
+
+### GET /api/auth/me
+
+현재 로그인한 사용자 정보를 조회합니다.
+
+**인증 필요**: Yes (Bearer Token)
+
+**요청 예시**
+```bash
+curl -X GET http://localhost:3000/api/auth/me \
+  -H "Authorization: Bearer <token>"
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "id": "usr_123",
+    "email": "user@example.com",
+    "name": "홍길동",
+    "profileImage": "https://lh3.googleusercontent.com/...",
+    "createdAt": "2024-12-21T00:00:00.000Z"
+  }
+}
+```
+
+**에러 응답**
+- `401 Unauthorized` - 인증 토큰 누락 또는 유효하지 않음
+- `500 Internal Server Error` - 서버 오류
+
+---
+
+### POST /api/auth/logout
+
+현재 세션을 로그아웃합니다. 리프레시 토큰을 무효화합니다.
+
+**인증 필요**: Yes (Bearer Token)
+
+**요청 예시**
+```bash
+curl -X POST http://localhost:3000/api/auth/logout \
+  -H "Authorization: Bearer <token>"
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "message": "Successfully logged out"
+  }
+}
+```
+
+**에러 응답**
+- `401 Unauthorized` - 인증 토큰 누락 또는 유효하지 않음
+- `500 Internal Server Error` - 서버 오류
+
+---
+
 ## 에러 코드
+
+### Health Check 관련
 
 | 코드 | 메시지 | 설명 |
 |------|--------|------|
 | `HEALTH_CHECK_FAILED` | Health check failed | 헬스 체크 실패 |
 | `MEMORY_THRESHOLD_EXCEEDED` | Memory usage exceeds threshold | 메모리 사용량 초과 |
 | `STORAGE_THRESHOLD_EXCEEDED` | Storage usage exceeds threshold | 디스크 사용량 초과 |
+
+### Auth 관련
+
+| 코드 | 메시지 | 설명 |
+|------|--------|------|
+| `INVALID_TOKEN` | Invalid token | 유효하지 않은 토큰 |
+| `TOKEN_EXPIRED` | Token expired | 토큰 만료 |
+| `UNAUTHORIZED` | Unauthorized | 인증 필요 |
+| `INVALID_GOOGLE_TOKEN` | Invalid Google ID token | 유효하지 않은 Google ID 토큰 |
+
+### Memories 관련
+
+| 코드 | 메시지 | 설명 |
+|------|--------|------|
+| `MEMORY_NOT_FOUND` | Memory not found | 추억을 찾을 수 없음 |
+| `FORBIDDEN` | Forbidden | 권한 없음 (다른 사용자의 추억) |
+| `VALIDATION_ERROR` | Validation failed | 입력 값 유효성 검증 실패 |
+| `FILE_TOO_LARGE` | File size exceeds limit | 파일 크기 초과 (10MB) |
+| `TOO_MANY_FILES` | Too many files | 파일 개수 초과 (최대 10개) |
+| `UNSUPPORTED_FILE_TYPE` | Unsupported file type | 지원하지 않는 파일 형식 |
+| `IMAGE_PROCESSING_FAILED` | Image processing failed | 이미지 처리 실패 |
+| `STORAGE_UPLOAD_FAILED` | Storage upload failed | 저장소 업로드 실패 |
+
+### AI 관련
+
+| 코드 | 메시지 | 설명 |
+|------|--------|------|
+| `AI_SERVICE_ERROR` | AI service error | AI 서비스 오류 |
+| `INSUFFICIENT_CONTEXT` | Insufficient context | 불충분한 컨텍스트 |
+| `INVALID_CONVERSATION` | Invalid conversation format | 유효하지 않은 대화 형식 |
 
 ---
 
@@ -417,6 +594,33 @@ curl -X GET "http://localhost:3000/api/memories/clx1234567890" \
         "createdAt": "2024-12-21T00:00:00.000Z"
       }
     ],
+    "styleMetadata": {
+      "colors": {
+        "primary": "#FCD34D",
+        "secondary": "#FDE68A",
+        "accent": "#F59E0B",
+        "background": "#FFFEF7",
+        "text": "#8B7300",
+        "gradient": ["#FCD34D", "#FDE68A", "#F59E0B"]
+      },
+      "animation": {
+        "duration": 2,
+        "easing": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "intensity": 0.85,
+        "particleCount": 30
+      },
+      "layout": {
+        "imageLayout": "masonry",
+        "contentPosition": "left",
+        "spacing": "spacious"
+      },
+      "typography": {
+        "headingSize": "large",
+        "bodySize": "medium",
+        "fontWeight": "bold",
+        "lineHeight": "tight"
+      }
+    },
     "createdAt": "2024-12-21T00:00:00.000Z",
     "updatedAt": "2024-12-21T00:00:00.000Z"
   }
@@ -452,6 +656,8 @@ interface AiAnalysisResult {
 - 평온 (Peaceful)
 - 슬픔 (Sad)
 - 감사 (Grateful)
+- 뿌듯함 (Proud)
+- 애틋함 (Tender)
 
 **Theme Tags (주제 태그)**
 - 여행 (Travel)
@@ -461,6 +667,7 @@ interface AiAnalysisResult {
 - 가족 (Family)
 - 성취 (Achievement)
 - 일상 (Daily Life)
+- 도전 (Challenge)
 
 **Animation Themes (애니메이션 테마)**
 - `happy`: 밝은 파티클, 따뜻한 그라데이션
@@ -468,6 +675,42 @@ interface AiAnalysisResult {
 - `exciting`: 반짝이는 빛, 생동감 있는 색상
 - `peaceful`: 부드러운 물결, 평온한 그라데이션
 - `melancholy`: 빗방울 효과, 쿨톤 색상
+
+---
+
+## Style Metadata 구조
+
+Memory 상세 조회 시 반환되는 프론트엔드 스타일 메타데이터:
+
+```typescript
+interface StyleMetadata {
+  colors: {
+    primary: string;      // 주 색상 (HEX)
+    secondary: string;    // 부 색상 (HEX)
+    accent: string;       // 강조 색상 (HEX)
+    background: string;   // 배경 색상 (HEX, 밝게 처리됨)
+    text: string;         // 텍스트 색상 (HEX, 어둡게 처리됨)
+    gradient: string[];   // 그라데이션 색상 배열
+  };
+  animation: {
+    duration: number;     // 애니메이션 시간 (초)
+    easing: string;       // CSS 이징 함수
+    intensity: number;    // 0.0 ~ 1.0
+    particleCount: number; // 파티클 개수
+  };
+  layout: {
+    imageLayout: 'masonry' | 'grid' | 'carousel' | 'stacked';
+    contentPosition: 'left' | 'center' | 'right';
+    spacing: 'compact' | 'normal' | 'spacious';
+  };
+  typography: {
+    headingSize: 'small' | 'medium' | 'large';
+    bodySize: 'small' | 'medium' | 'large';
+    fontWeight: 'light' | 'normal' | 'bold';
+    lineHeight: 'tight' | 'normal' | 'relaxed';
+  };
+}
+```
 
 ---
 
@@ -494,38 +737,187 @@ interface AiAnalysisResult {
 
 ---
 
-## 향후 추가 예정 API
+## AI API
 
-### Auth
-- `POST /api/auth/google` - Google OAuth 로그인
-- `GET /api/auth/me` - 현재 사용자 정보
+AI API는 추억 복원을 위한 인터랙티브 인터뷰와 스토리 생성 기능을 제공합니다.
 
-### Spotify Integration (음악 주파수 맞추기)
-- `POST /api/spotify/connect` - Spotify OAuth 연동
-- `GET /api/spotify/recommendations` - AI 분석 기반 곡 추천 (무드/테마 매칭)
-- `GET /api/spotify/search` - 라디오 다이얼식 곡 탐색
-- `GET /api/spotify/track/:id/preview` - 미리듣기 URL 제공
-- `POST /api/memories/:id/bgm` - 메모리에 BGM 설정
+### POST /api/ai/start-interview
 
-### AI Interactive Interview
-- `POST /api/ai/chat` - 추억 복원을 위한 AI 질의응답
-- `POST /api/ai/analyze-image` - 업로드된 이미지 기반 감성 질문 생성
-- `POST /api/ai/generate-story` - 대화 내용 기반 최종 서사 생성
+AI 인터뷰를 시작합니다. 초기 인사말과 질문 리스트를 반환합니다.
 
-### Memories (추가 기능)
-- `PATCH /api/memories/:id` - 메모리 수정
-- `DELETE /api/memories/:id` - 메모리 삭제
+**인증 필요**: Yes (Bearer Token)
 
-### Share
-- `POST /api/memories/:id/share` - 메모리 공유 링크 생성 (인스타그램 스토리, 링크)
-- `GET /s/:shareToken` - 공유된 메모리 조회 (비회원 접근 가능)
-- `POST /api/memories/:id/export-story` - 인스타그램 스토리용 이미지 생성
+**요청 (JSON)**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| initialContext | string | No | 초기 컨텍스트 (예: 사진 설명) |
+
+**요청 예시**
+```bash
+curl -X POST http://localhost:3000/api/ai/start-interview \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "initialContext": "가족과 함께한 여름 제주도 여행 사진입니다"
+  }'
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "questions": [
+      "이 여행은 언제 가셨나요?",
+      "가장 기억에 남는 순간은 무엇이었나요?",
+      "함께한 사람들은 누구였나요?"
+    ],
+    "initialGreeting": "안녕하세요! 소중한 추억을 함께 정리해보겠습니다. 천천히 생각나시는 대로 말씀해주세요."
+  }
+}
+```
+
+**에러 응답**
+- `401 Unauthorized` - 인증 토큰 누락 또는 유효하지 않음
+- `500 Internal Server Error` - AI 서비스 오류
+
+---
+
+### POST /api/ai/chat
+
+인터뷰 중 사용자의 메시지를 처리하고 AI의 응답을 반환합니다.
+
+**인증 필요**: Yes (Bearer Token)
+
+**요청 (JSON)**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| conversationHistory | ConversationMessage[] | Yes | 대화 기록 |
+| userMessage | string | Yes | 사용자 메시지 |
+
+**ConversationMessage 구조:**
+```typescript
+{
+  role: 'user' | 'assistant',
+  content: string
+}
+```
+
+**요청 예시**
+```bash
+curl -X POST http://localhost:3000/api/ai/chat \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversationHistory": [
+      { "role": "assistant", "content": "이 여행은 언제 가셨나요?" },
+      { "role": "user", "content": "2024년 7월 15일이었어요" }
+    ],
+    "userMessage": "가족 모두 함께 갔어요"
+  }'
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "response": "가족분들과 함께 하셨군요! 그 날의 날씨는 어땠나요? 특별히 기억나는 장소가 있으신가요?",
+    "suggestedNextQuestions": [
+      "날씨는 어땠나요?",
+      "어떤 장소를 방문하셨나요?"
+    ],
+    "shouldContinue": true
+  }
+}
+```
+
+**응답 필드 설명:**
+- `response`: AI의 응답 메시지
+- `suggestedNextQuestions`: 다음에 물어볼 수 있는 질문들 (선택적)
+- `shouldContinue`: 인터뷰를 계속할지 여부 (false면 충분한 정보 수집됨)
+
+**에러 응답**
+- `400 Bad Request` - 유효하지 않은 대화 기록 형식
+- `401 Unauthorized` - 인증 토큰 누락 또는 유효하지 않음
+- `500 Internal Server Error` - AI 서비스 오류
+
+---
+
+### POST /api/ai/generate-story
+
+인터뷰 대화 기록을 분석하여 최종 스토리를 생성합니다.
+
+**인증 필요**: Yes (Bearer Token)
+
+**요청 (JSON)**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| conversationHistory | ConversationMessage[] | Yes | 전체 대화 기록 |
+
+**요청 예시**
+```bash
+curl -X POST http://localhost:3000/api/ai/generate-story \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "conversationHistory": [
+      { "role": "assistant", "content": "이 여행은 언제 가셨나요?" },
+      { "role": "user", "content": "2024년 7월 15일이었어요" },
+      { "role": "assistant", "content": "누구와 함께 하셨나요?" },
+      { "role": "user", "content": "가족 모두 함께 갔어요. 날씨도 좋았고 정말 행복한 시간이었어요" }
+    ]
+  }'
+```
+
+**응답 (200 OK)**
+```json
+{
+  "data": {
+    "moodTag": "행복",
+    "intensity": 85,
+    "themeTag": "여행",
+    "storyLine": "따뜻한 여름날, 가족과 함께한 제주도 여행. 푸른 바다와 맑은 하늘 아래 모두가 행복한 미소를 지었던 특별한 하루였습니다.",
+    "animationTheme": "happy"
+  }
+}
+```
+
+**응답 필드 설명:**
+- `moodTag`: 감정 태그 (행복, 그리움, 설렘, 평온, 슬픔, 감사)
+- `intensity`: 감정 강도 (0-100)
+- `themeTag`: 주제 태그 (여행, 성장, 사랑, 우정, 가족, 성취, 일상)
+- `storyLine`: AI가 생성한 3-5문장 스토리
+- `animationTheme`: 애니메이션 테마 (happy, nostalgic, exciting, peaceful, melancholy)
+
+**에러 응답**
+- `400 Bad Request` - 유효하지 않은 대화 기록 또는 불충분한 정보
+- `401 Unauthorized` - 인증 토큰 누락 또는 유효하지 않음
+- `500 Internal Server Error` - AI 서비스 오류
 
 ---
 
 ## 변경 이력
 
+### v0.0.3 (2025-12-23)
+- Google OAuth 인증 API 문서 추가 (미구현, 문서만 추가)
+- StyleMetadata 구조 업데이트 (실제 구현에 맞게 수정)
+  - colors에 background, text, gradient 필드 추가
+  - animation에 particleCount 필드 추가
+  - layout 섹션 추가
+  - typography에 lineHeight 필드 추가
+- Mood Tags에 뿌듯함, 애틋함 추가
+- Theme Tags에 도전 추가
+
+### v0.0.2 (2025-12-23)
+- AI API 엔드포인트 문서화 추가 (start-interview, chat, generate-story)
+- Memory 응답 스키마에 `styleMetadata` 필드 추가
+- 에러 코드 섹션 확장 (Memories, AI 관련 에러 추가)
+- 미구현 API 섹션 제거 (Auth, Spotify, Share 등)
+
 ### v0.0.1 (2025-12-20)
 - 초기 API 명세서 작성
 - Health check 엔드포인트 문서화
 - Root 엔드포인트 문서화
+- Memories API 엔드포인트 문서화
