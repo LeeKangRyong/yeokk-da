@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 interface QuestionCardProps {
   question: string;
   index?: number;
+  isDeepInterview?: boolean;
 }
 
-export function QuestionCard({ question, index }: QuestionCardProps) {
+export function QuestionCard({ question, index, isDeepInterview }: QuestionCardProps) {
   return (
     <motion.div
       className="relative mx-auto w-full max-w-2xl"
@@ -16,10 +17,12 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
     >
       <div className="rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 p-6 shadow-md">
-        {/* Question Number Badge */}
+        {/* Question Number Badge - shows "심층 질문" in deep interview mode */}
         {index !== undefined && (
           <motion.div
-            className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary-600 px-3 py-1 text-xs font-semibold text-white shadow-sm"
+            className={`mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-sm ${
+              isDeepInterview ? 'bg-amber-600' : 'bg-primary-600'
+            }`}
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
@@ -36,7 +39,7 @@ export function QuestionCard({ question, index }: QuestionCardProps) {
                 clipRule="evenodd"
               />
             </svg>
-            질문 {index + 1}
+            {isDeepInterview ? '심층 질문' : `질문 ${index + 1}`}
           </motion.div>
         )}
 

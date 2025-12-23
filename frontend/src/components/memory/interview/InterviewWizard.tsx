@@ -9,6 +9,12 @@ import { InterviewComplete } from './InterviewComplete';
 
 export function InterviewWizard() {
   const currentStep = useInterviewStore((state) => state.currentStep);
+  const reset = useInterviewStore((state) => state.reset);
+
+  // Reset state on mount - always start fresh from upload page
+  useEffect(() => {
+    reset();
+  }, [reset]);
 
   // Add beforeunload warning during interview
   useEffect(() => {

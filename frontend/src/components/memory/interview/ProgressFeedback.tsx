@@ -7,12 +7,14 @@ interface ProgressFeedbackProps {
   questionsAnswered: number;
   totalQuestions: number;
   narrativeDepth: number;
+  isDeepInterview?: boolean;
 }
 
 export function ProgressFeedback({
   questionsAnswered,
   totalQuestions,
   narrativeDepth,
+  isDeepInterview,
 }: ProgressFeedbackProps) {
   // Get feedback message based on narrative depth
   const getFeedbackMessage = () => {
@@ -51,11 +53,16 @@ export function ProgressFeedback({
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+            isDeepInterview ? 'bg-amber-100 text-amber-700' : 'bg-primary-100 text-primary-700'
+          }`}>
             {questionsAnswered}
           </div>
           <span className="text-sm text-gray-600">
-            / {totalQuestions} 질문 답변
+            {isDeepInterview
+              ? '질문 답변 (심층 인터뷰 중)'
+              : `/ ${totalQuestions} 질문 답변`
+            }
           </span>
         </motion.div>
 

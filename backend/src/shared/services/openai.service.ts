@@ -212,17 +212,21 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
 
       const systemPrompt = `당신은 사용자의 추억을 복원하도록 돕는 공감적인 AI 인터뷰어입니다.
 사용자의 응답을 듣고:
-1. 공감하며 더 깊은 이야기를 이끌어내세요
-2. 필요하다면 후속 질문을 1-2개 제안하세요
-3. 충분한 정보가 모였다면 대화를 마무리하세요
+1. 사용자가 말한 내용에 공감하고 요약해주세요
+2. 응답에는 질문을 포함하지 마세요 (질문은 별도로 표시됩니다)
+3. 따뜻하고 감성적인 톤으로 리액션해주세요
+4. 필요하다면 후속 질문을 suggestedNextQuestions에만 제안하세요 (response에는 넣지 마세요)
+5. 충분한 정보가 모였다면 shouldContinue를 false로 설정하세요
 
 다음 형식의 JSON으로 응답하세요:
 
 {
-  "response": "사용자에게 전달할 공감적인 응답",
+  "response": "사용자 답변에 대한 공감과 요약 (질문 없이, 2-3문장)",
   "suggestedNextQuestions": ["후속 질문1", "후속 질문2"],
   "shouldContinue": true 또는 false (충분한 정보가 모였으면 false)
-}`;
+}
+
+주의: response에는 절대로 질문을 포함하지 마세요. 질문은 반드시 suggestedNextQuestions 배열에만 넣으세요.`;
 
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         {
@@ -244,16 +248,21 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
         messages: messages,
         response_format: { type: 'json_object' },
         temperature: 0.8,
+        max_tokens: 1000,
       });
 
       const responseText = completion.choices[0]?.message?.content || '';
 
+      if (!responseText) {
+        this.logger.warn('OpenAI returned an empty response.');
+      }
+
       return this.parseChatResponse(responseText);
-    } catch (error) {
-      this.logger.error('Failed to process chat', error);
-      throw new InternalServerError(
-        'Chat processing failed. Please try again.',
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('OpenAI API Error:', errorMessage);
+      throw new InternalServerError('Chat processing failed.');
     }
   }
 
@@ -277,7 +286,7 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
 
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
         ...conversationHistory.map((msg) => ({
-          role: msg.role as 'user' | 'assistant',
+          role: msg.role,
           content: msg.content,
         })),
         {
@@ -342,22 +351,43 @@ ${initialContext ? `사용자 초기 입력: ${initialContext}\n\n` : ''}
   }
 
   private parseChatResponse(response: string): AiChatResponse {
-    try {
-      const parsed = JSON.parse(response) as {
-        response?: string;
-        suggestedNextQuestions?: string[];
-        shouldContinue?: boolean;
+    // 빈 응답 체크
+    if (!response || response.trim() === '') {
+      this.logger.warn('Received empty response from OpenAI');
+      return {
+        response:
+          '죄송해요, 잠시 대화를 이해하지 못했어요. 다시 말씀해 주시겠어요?',
+        suggestedNextQuestions: [],
+        shouldContinue: true,
       };
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(response);
+
+      const isObject = typeof parsed === 'object' && parsed !== null;
+
+      const data = isObject ? (parsed as Record<string, any>) : {};
 
       return {
-        response: parsed.response || '더 자세히 말씀해주시겠어요?',
-        suggestedNextQuestions: parsed.suggestedNextQuestions || [],
-        shouldContinue: parsed.shouldContinue !== false,
+        response:
+          typeof data.response === 'string'
+            ? data.response
+            : '더 자세히 말씀해주시겠어요?',
+        suggestedNextQuestions: Array.isArray(data.suggestedNextQuestions)
+          ? data.suggestedNextQuestions
+          : [],
+        shouldContinue: data.shouldContinue !== false,
       };
     } catch (error) {
-      this.logger.error('Failed to parse chat response', error);
+      this.logger.error(
+        `JSON Parsing Error. Raw Response: ${response}`,
+        error instanceof Error ? error.stack : 'Unknown error',
+      );
+
       return {
-        response: '더 자세히 말씀해주시겠어요?',
+        response:
+          '이야기를 계속 듣고 싶어요. 조금 더 자세히 설명해 주시겠어요?',
         suggestedNextQuestions: [],
         shouldContinue: true,
       };

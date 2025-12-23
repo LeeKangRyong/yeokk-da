@@ -33,7 +33,7 @@ export function useStartInterview() {
  * Hook to send a message in the AI interview chat
  */
 export function useChatInterview() {
-  const { conversationHistory, addMessage, setAiTyping, nextQuestion } =
+  const { conversationHistory, addMessage, setAiTyping, nextQuestion, addFollowUpQuestions } =
     useInterviewStore();
 
   return useMutation({
@@ -67,6 +67,10 @@ export function useChatInterview() {
 
       // Move to next question if conversation should continue
       if (data.shouldContinue) {
+        // Add suggested follow-up questions if provided
+        if (data.suggestedNextQuestions && data.suggestedNextQuestions.length > 0) {
+          addFollowUpQuestions(data.suggestedNextQuestions);
+        }
         nextQuestion();
       }
 

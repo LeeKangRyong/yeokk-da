@@ -19,6 +19,7 @@ export function ChatInterview() {
     currentQuestionIndex,
     isAiTyping,
     progress,
+    isDeepInterview,
   } = useInterviewStore();
 
   const {
@@ -54,9 +55,8 @@ export function ChatInterview() {
     sendMessage(message);
   };
 
-  // Current question to display (progressive disclosure)
-  const currentQuestion =
-    questions[currentQuestionIndex] || null;
+  // Current question to display
+  const currentQuestion = questions[currentQuestionIndex] || null;
 
   // Show generating story overlay
   if (isGenerating) {
@@ -93,6 +93,7 @@ export function ChatInterview() {
         questionsAnswered={progress.questionsAnswered}
         totalQuestions={progress.totalQuestions}
         narrativeDepth={progress.narrativeDepth}
+        isDeepInterview={isDeepInterview}
       />
 
       {/* Messages Container */}
@@ -106,7 +107,7 @@ export function ChatInterview() {
             <ChatMessage key={index} message={message} />
           ))}
 
-          {/* Current Question (Progressive Disclosure) */}
+          {/* Current Question Card */}
           <AnimatePresence mode="wait">
             {currentQuestion && !isAiTyping && (
               <motion.div
@@ -114,12 +115,13 @@ export function ChatInterview() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.3 }}
                 className="py-4"
               >
                 <QuestionCard
                   question={currentQuestion}
                   index={currentQuestionIndex}
+                  isDeepInterview={isDeepInterview}
                 />
               </motion.div>
             )}
