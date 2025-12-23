@@ -5,18 +5,18 @@ export function Footer() {
 
   const footerLinks = {
     product: [
-      { label: '기능', href: '/features' },
-      { label: '요금', href: '/pricing' },
-      { label: 'FAQ', href: '/faq' },
+      { label: '기능', href: '/features', disabled: true },
+      { label: '요금', href: '/pricing', disabled: true },
+      { label: 'FAQ', href: '/faq', disabled: true },
     ],
     company: [
-      { label: '소개', href: '/about' },
-      { label: '블로그', href: '/blog' },
-      { label: '채용', href: '/careers' },
+      { label: '소개', href: '/about', disabled: true },
+      { label: '블로그', href: '/blog', disabled: true },
+      { label: '채용', href: '/careers', disabled: true },
     ],
     legal: [
-      { label: '이용약관', href: '/terms' },
-      { label: '개인정보처리방침', href: '/privacy' },
+      { label: '이용약관', href: '/terms', disabled: true },
+      { label: '개인정보처리방침', href: '/privacy', disabled: true },
     ],
   };
 
@@ -38,12 +38,20 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-600 transition-colors hover:text-gray-900"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.disabled ? (
+                    // 클릭 안 되는 상태 (회색 텍스트)
+                    <span className="text-sm text-gray-400 cursor-default">
+                      {link.label}
+                    </span>
+                  ) : (
+                    // 클릭 되는 상태 (기존 Link)
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -55,12 +63,20 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-600 transition-colors hover:text-gray-900"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.disabled ? (
+                    // 클릭 안 되는 상태 (회색 텍스트)
+                    <span className="text-sm text-gray-400 cursor-default">
+                      {link.label}
+                    </span>
+                  ) : (
+                    // 클릭 되는 상태 (기존 Link)
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -72,12 +88,20 @@ export function Footer() {
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-600 transition-colors hover:text-gray-900"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.disabled ? (
+                    // 클릭 안 되는 상태 (회색 텍스트)
+                    <span className="text-sm text-gray-400 cursor-default">
+                      {link.label}
+                    </span>
+                  ) : (
+                    // 클릭 되는 상태 (기존 Link)
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
