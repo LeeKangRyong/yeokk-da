@@ -85,7 +85,7 @@ export function ImageContextStep() {
           show: { opacity: 1, y: 0 },
         }}
       >
-        <h1 className="mb-2 text-3xl font-bold text-gray-900">
+        <h1 className="mb-2 text-3xl font-bold text-gray-400">
           추억의 사진을 업로드하고 간단히 설명해주세요
         </h1>
         <p className="text-gray-600">
@@ -124,7 +124,7 @@ export function ImageContextStep() {
           showCharCount
           currentLength={initialContext.length}
         />
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-gray-400">
           간단한 설명만으로도 좋아요. AI가 질문을 통해 더 자세히 알아갈게요!
         </p>
       </motion.div>

@@ -247,7 +247,7 @@ export function PokemonCardView({ memory }: PokemonCardViewProps) {
               }}
             >
               <div className="flex items-center justify-between text-sm">
-                <div style={{ color: `${colors.text}99` }}>
+                <div style={{ color: `${colors.text}99`, visibility: 'hidden' }}>
                   감정 강도: {memory.intensity}%
                 </div>
                 <div style={{ color: `${colors.text}99` }}>
