@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { StyleMetadata } from '../../shared/services/style-mapper.service';
 
 export class MemoryImageDto {
   id: string;
@@ -31,6 +32,7 @@ export class MemoryResponseDto {
   animationTheme: string;
   images: MemoryImageDto[];
   sources?: MemorySourceDto[];
+  styleMetadata?: StyleMetadata;
   createdAt: Date;
   updatedAt: Date;
 }

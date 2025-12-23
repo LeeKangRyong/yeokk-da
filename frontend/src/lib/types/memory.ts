@@ -1,4 +1,5 @@
 // Memory type definitions mirroring backend DTOs
+import { StyleMetadata } from './style';
 
 export interface MemoryImage {
   id: string;
@@ -30,6 +31,7 @@ export interface Memory {
   animationTheme: string;
   images: MemoryImage[];
   sources?: MemorySource[];
+  styleMetadata?: StyleMetadata;
   createdAt: string;
   updatedAt: string;
 }

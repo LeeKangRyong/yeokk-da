@@ -4,6 +4,7 @@ import { PrismaService } from '../shared/prisma/prisma.service';
 import { AzureStorageService } from '../shared/services/azure-storage.service';
 import { ImageProcessingService } from '../shared/services/image-processing.service';
 import { OpenAiService } from '../shared/services/openai.service';
+import { StyleMapperService } from '../shared/services/style-mapper.service';
 import {
   NotFoundError,
   ForbiddenError,
@@ -25,6 +26,7 @@ export class MemoriesService {
     private azureStorage: AzureStorageService,
     private imageProcessing: ImageProcessingService,
     private openai: OpenAiService,
+    private styleMapper: StyleMapperService,
   ) {}
 
   async create(
@@ -178,7 +180,17 @@ export class MemoriesService {
       throw new ForbiddenError('You do not have access to this memory');
     }
 
-    return this.toResponseDto(memory);
+    const dto = this.toResponseDto(memory);
+
+    // Generate style metadata for detail view
+    dto.styleMetadata = this.styleMapper.generateStyleMetadata({
+      moodTag: memory.moodTag,
+      themeTag: memory.themeTag,
+      intensity: memory.intensity,
+      animationTheme: memory.animationTheme,
+    });
+
+    return dto;
   }
 
   private buildWhereClause(

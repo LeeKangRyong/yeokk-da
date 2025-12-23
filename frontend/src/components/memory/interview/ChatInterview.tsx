@@ -10,6 +10,7 @@ import { QuestionCard } from './QuestionCard';
 import { TypingIndicator } from './TypingIndicator';
 import { ChatInput } from '@/components/ui/ChatInput';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { BackButton } from '@/components/ui/BackButton';
 
 export function ChatInterview() {
   const {
@@ -83,7 +84,10 @@ export function ChatInterview() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-200px)] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+    <div className="relative flex h-[calc(100vh-200px)] flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+      {/* Back Button */}
+      <BackButton className="absolute left-4 top-4 z-20" />
+
       {/* Progress Feedback Header */}
       <ProgressFeedback
         questionsAnswered={progress.questionsAnswered}
